@@ -62,3 +62,18 @@ func (s *UserServiceImpl) UpdatePasswd(ctx context.Context, req *user.UpdatePass
 func (s *UserServiceImpl) UpdateBirthDay(ctx context.Context, req *user.UpdateBirthDayRequest) (resp *user.UpdateBirthDayResponse, err error) {
 	return s.app.UpdateBirthDay(ctx, req)
 }
+
+// UploadAvatar implements the UserServiceImpl interface.
+func (s *UserServiceImpl) UploadAvatar(ctx context.Context, req *user.UploadAvatarRequest) (resp *user.UploadAvatarResponse, err error) {
+	return s.app.UploadAvatar(ctx, req)
+}
+
+// UpdateAvatarInfo implements the UserServiceImpl interface.
+func (s *UserServiceImpl) UpdateAvatarInfo(ctx context.Context, req *user.UpdateAvatarInfoRequest) (resp *user.UpdateAvatarInfoResponse, err error) {
+	return s.app.UpdateAvatarInfo(ctx, req)
+}
+
+// GetAvatar implements the UserServiceImpl interface.
+func (s *UserServiceImpl) GetAvatar(ctx context.Context, req *user.GetAvatarRequest) (resp *user.GetAvatarResponse, err error) {
+	return s.app.GetAvatar(ctx, req)
+}

@@ -9,9 +9,9 @@ struct GeneratePutPreSignedUrlRequest {
 }
 
 struct GeneratePutPreSignedUrlResponse {
-    1: base.BaseResponse base_resp,
-    2: string url,
-    3: string id,
+    1: string url,
+    2: string id,
+    3: string object_name,
 }
 
 struct GenerateGetPreSignedUrlRequest {
@@ -20,19 +20,17 @@ struct GenerateGetPreSignedUrlRequest {
 }
 
 struct GenerateGetPreSignedUrlResponse {
-    1: base.BaseResponse base_resp,
     2: string url,
 }
 
 struct NotifyBlobUploadRequest {
     1: string blob_id,
     2: string user_id,
-    3: string url,
+    3: string object_name,
+    4: i8 blob_type,
 }
 
-struct NotifyBlobUploadResponse {
-    1: base.BaseResponse base_resp,
-}
+struct NotifyBlobUploadResponse {}
 
 service BlobService {
     GeneratePutPreSignedUrlResponse GeneratePutPreSignedUrl(1: GeneratePutPreSignedUrlRequest req),

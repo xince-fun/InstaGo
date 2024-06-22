@@ -29,7 +29,7 @@ type BlobUploadedEvent struct {
 	EventId    string
 	BlobID     string
 	UserID     string
-	URL        string
+	ObjectName string
 	BlobType   int8
 	UploadTime time.Time
 }
@@ -48,5 +48,5 @@ func (e *BlobUploadedEvent) BlobId() string {
 
 func (e *BlobUploadedEvent) String() string {
 	return fmt.Sprintf("BlobUploadedEvent [EventId: %s, BlobID: %s, UserID: %s, URL: %s, UploadTime: %s]",
-		e.EventId, e.BlobID, e.UserID, e.URL, e.UploadTime.Format(time.RFC3339))
+		e.EventId, e.BlobID, e.UserID, e.ObjectName, e.UploadTime.Format(time.RFC3339))
 }

@@ -69,6 +69,27 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
+	"UploadAvatar": kitex.NewMethodInfo(
+		uploadAvatarHandler,
+		newUserServiceUploadAvatarArgs,
+		newUserServiceUploadAvatarResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
+	"UpdateAvatarInfo": kitex.NewMethodInfo(
+		updateAvatarInfoHandler,
+		newUserServiceUpdateAvatarInfoArgs,
+		newUserServiceUpdateAvatarInfoResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
+	"GetAvatar": kitex.NewMethodInfo(
+		getAvatarHandler,
+		newUserServiceGetAvatarArgs,
+		newUserServiceGetAvatarResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
 }
 
 var (
@@ -279,6 +300,60 @@ func newUserServiceUpdateBirthDayResult() interface{} {
 	return user.NewUserServiceUpdateBirthDayResult()
 }
 
+func uploadAvatarHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceUploadAvatarArgs)
+	realResult := result.(*user.UserServiceUploadAvatarResult)
+	success, err := handler.(user.UserService).UploadAvatar(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceUploadAvatarArgs() interface{} {
+	return user.NewUserServiceUploadAvatarArgs()
+}
+
+func newUserServiceUploadAvatarResult() interface{} {
+	return user.NewUserServiceUploadAvatarResult()
+}
+
+func updateAvatarInfoHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceUpdateAvatarInfoArgs)
+	realResult := result.(*user.UserServiceUpdateAvatarInfoResult)
+	success, err := handler.(user.UserService).UpdateAvatarInfo(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceUpdateAvatarInfoArgs() interface{} {
+	return user.NewUserServiceUpdateAvatarInfoArgs()
+}
+
+func newUserServiceUpdateAvatarInfoResult() interface{} {
+	return user.NewUserServiceUpdateAvatarInfoResult()
+}
+
+func getAvatarHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceGetAvatarArgs)
+	realResult := result.(*user.UserServiceGetAvatarResult)
+	success, err := handler.(user.UserService).GetAvatar(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceGetAvatarArgs() interface{} {
+	return user.NewUserServiceGetAvatarArgs()
+}
+
+func newUserServiceGetAvatarResult() interface{} {
+	return user.NewUserServiceGetAvatarResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -364,6 +439,36 @@ func (p *kClient) UpdateBirthDay(ctx context.Context, req *user.UpdateBirthDayRe
 	_args.Req = req
 	var _result user.UserServiceUpdateBirthDayResult
 	if err = p.c.Call(ctx, "UpdateBirthDay", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) UploadAvatar(ctx context.Context, req *user.UploadAvatarRequest) (r *user.UploadAvatarResponse, err error) {
+	var _args user.UserServiceUploadAvatarArgs
+	_args.Req = req
+	var _result user.UserServiceUploadAvatarResult
+	if err = p.c.Call(ctx, "UploadAvatar", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) UpdateAvatarInfo(ctx context.Context, req *user.UpdateAvatarInfoRequest) (r *user.UpdateAvatarInfoResponse, err error) {
+	var _args user.UserServiceUpdateAvatarInfoArgs
+	_args.Req = req
+	var _result user.UserServiceUpdateAvatarInfoResult
+	if err = p.c.Call(ctx, "UpdateAvatarInfo", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetAvatar(ctx context.Context, req *user.GetAvatarRequest) (r *user.GetAvatarResponse, err error) {
+	var _args user.UserServiceGetAvatarArgs
+	_args.Req = req
+	var _result user.UserServiceGetAvatarResult
+	if err = p.c.Call(ctx, "GetAvatar", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

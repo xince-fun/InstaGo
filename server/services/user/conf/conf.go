@@ -24,6 +24,7 @@ type ServerConfig struct {
 	OtelConfig   OtelConfig   `mapstructure:"otel" json:"otel"`
 	PasetoConfig PasetoConfig `mapstructure:"paseto" json:"paseto"`
 	MysqlConfig  MysqlConfig  `mapstructure:"mysql" json:"mysql"`
+	BlobSrvInfo  RPCSrvConfig `mapstructure:"blob_srv" json:"blob_srv"`
 }
 
 type OtelConfig struct {
@@ -39,4 +40,8 @@ type ConsulConfig struct {
 type PasetoConfig struct {
 	SecretKey string `mapstructure:"secret_key" json:"secret_key"`
 	Implicit  string `mapstructure:"implicit" json:"implicit"`
+}
+
+type RPCSrvConfig struct {
+	Name string `mapstructure:"name" json:"name"`
 }

@@ -7,10 +7,12 @@ import (
 	"github.com/google/wire"
 	"github.com/xince-fun/InstaGo/server/services/user/domain/entity"
 	"github.com/xince-fun/InstaGo/server/services/user/domain/repo"
+	"github.com/xince-fun/InstaGo/server/services/user/infra/sal"
 	"github.com/xince-fun/InstaGo/server/services/user/pkg/md5"
 	"github.com/xince-fun/InstaGo/server/services/user/pkg/paseto"
 	"github.com/xince-fun/InstaGo/server/shared/consts"
 	"github.com/xince-fun/InstaGo/server/shared/errno"
+	"github.com/xince-fun/InstaGo/server/shared/kitex_gen/blob"
 	"github.com/xince-fun/InstaGo/server/shared/kitex_gen/user"
 	"github.com/xince-fun/InstaGo/server/shared/utils"
 	"time"
@@ -22,15 +24,18 @@ var UserApplicationServiceSet = wire.NewSet(
 	repo.UserRepositorySet,
 	md5.EncryptManagerSet,
 	paseto.TokenGeneratorSet,
+	sal.BlobManagerSet,
 	NewUserApplicationService,
 	wire.Bind(new(EncryptManager), new(*md5.EncryptManager)),
 	wire.Bind(new(TokenGenerator), new(*paseto.TokenGenerator)),
+	wire.Bind(new(BlobManager), new(*sal.BlobManager)),
 )
 
 type UserApplicationService struct {
 	userRepo       repo.UserRepository
 	encryptManager EncryptManager
 	tokenGenerator TokenGenerator
+	BlobManager    BlobManager
 }
 
 type EncryptManager interface {
@@ -41,11 +46,19 @@ type TokenGenerator interface {
 	CreateToken(*hpaseto.StandardClaims) (string, error)
 }
 
-func NewUserApplicationService(userRepo repo.UserRepository, encryptManager EncryptManager, tokenGenerator TokenGenerator) *UserApplicationService {
+type BlobManager interface {
+	UploadBlob(context.Context, *blob.GeneratePutPreSignedUrlRequest) (*blob.GeneratePutPreSignedUrlResponse, error)
+	GetBlob(context.Context, *blob.GenerateGetPreSignedUrlRequest) (*blob.GenerateGetPreSignedUrlResponse, error)
+	NotifyBlobUpload(context.Context, *blob.NotifyBlobUploadRequest) (*blob.NotifyBlobUploadResponse, error)
+}
+
+func NewUserApplicationService(userRepo repo.UserRepository, encryptManager EncryptManager,
+	tokenGenerator TokenGenerator, blobManager BlobManager) *UserApplicationService {
 	return &UserApplicationService{
 		userRepo:       userRepo,
 		encryptManager: encryptManager,
 		tokenGenerator: tokenGenerator,
+		BlobManager:    blobManager,
 	}
 }
 
@@ -289,6 +302,85 @@ func (s *UserApplicationService) UpdateBirthDay(ctx context.Context, req *user.U
 		return resp, nil
 	}
 
+	resp.BaseResp = utils.BuildBaseResp(nil)
+	return resp, nil
+}
+
+func (s *UserApplicationService) UploadAvatar(ctx context.Context, req *user.UploadAvatarRequest) (resp *user.UploadAvatarResponse, err error) {
+	resp = new(user.UploadAvatarResponse)
+
+	_, err = s.userRepo.FindUserInfoByUserIDNonNil(ctx, req.UserId)
+	if err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.RecordNotFound)
+		return resp, nil
+	}
+
+	blobResp, err := s.BlobManager.UploadBlob(ctx, &blob.GeneratePutPreSignedUrlRequest{
+		UserId:   req.UserId,
+		BlobType: consts.AvatarBlobType,
+		Timeout:  int32(10 * time.Second.Seconds()),
+	})
+	if err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.BlobSrvError)
+		return resp, nil
+	}
+
+	resp.AvatarUrl = blobResp.Url
+	resp.AvatarId = blobResp.Id
+	resp.ObjectName = blobResp.ObjectName
+	resp.BaseResp = utils.BuildBaseResp(nil)
+	return resp, nil
+}
+
+func (s *UserApplicationService) UpdateAvatarInfo(ctx context.Context, req *user.UpdateAvatarInfoRequest) (resp *user.UpdateAvatarInfoResponse, err error) {
+	resp = new(user.UpdateAvatarInfoResponse)
+
+	usrInfo, err := s.userRepo.FindUserInfoByUserIDNonNil(ctx, req.UserId)
+	if err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.RecordNotFound)
+		return resp, nil
+	}
+
+	_, err = s.BlobManager.NotifyBlobUpload(ctx, &blob.NotifyBlobUploadRequest{
+		BlobId:     req.AvatarId,
+		UserId:     req.UserId,
+		ObjectName: req.ObjectName,
+		BlobType:   req.BlobType,
+	})
+	if err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.BlobSrvError)
+		return resp, nil
+	}
+
+	usrInfo.SetAvatarID(req.AvatarId)
+	if err = s.userRepo.SaveUserInfo(ctx, usrInfo); err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.UserSrvError)
+		return resp, nil
+	}
+
+	resp.BaseResp = utils.BuildBaseResp(nil)
+	return resp, nil
+}
+
+func (s *UserApplicationService) GetAvatar(ctx context.Context, req *user.GetAvatarRequest) (resp *user.GetAvatarResponse, err error) {
+	resp = new(user.GetAvatarResponse)
+
+	usrInfo, err := s.userRepo.FindUserInfoByUserIDNonNil(ctx, req.UserId)
+	if err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.RecordNotFound)
+		return resp, nil
+	}
+
+	blobResp, err := s.BlobManager.GetBlob(ctx, &blob.GenerateGetPreSignedUrlRequest{
+		BlobId:  usrInfo.AvatarID,
+		Timeout: int32(60 * time.Second.Seconds()),
+	})
+	if err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.BlobSrvError)
+		return resp, nil
+	}
+
+	resp.AvatarUrl = blobResp.Url
 	resp.BaseResp = utils.BuildBaseResp(nil)
 	return resp, nil
 }

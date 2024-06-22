@@ -10,6 +10,7 @@ import (
 	"github.com/xince-fun/InstaGo/server/services/user/app"
 	"github.com/xince-fun/InstaGo/server/services/user/infra/persistence"
 	"github.com/xince-fun/InstaGo/server/services/user/infra/persistence/dal"
+	"github.com/xince-fun/InstaGo/server/services/user/infra/sal"
 	"github.com/xince-fun/InstaGo/server/services/user/pkg/initialize"
 	"github.com/xince-fun/InstaGo/server/services/user/pkg/md5"
 	"github.com/xince-fun/InstaGo/server/services/user/pkg/paseto"
@@ -26,7 +27,9 @@ func InitializeService() *UserServiceImpl {
 	asymmetricKey := paseto.ProvidePasetoAsymmetricKey()
 	implicit := paseto.ProvidePasetoImplicit()
 	tokenGenerator := paseto.NewTokenGenerator(asymmetricKey, implicit)
-	userApplicationService := app.NewUserApplicationService(userRepo, encryptManager, tokenGenerator)
+	client := initialize.InitBlob()
+	blobManager := sal.NewBlobManager(client)
+	userApplicationService := app.NewUserApplicationService(userRepo, encryptManager, tokenGenerator, blobManager)
 	userServiceImpl := NewUserServiceImpl(userApplicationService)
 	return userServiceImpl
 }

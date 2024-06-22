@@ -57,3 +57,18 @@ func (r *BlobRepo) FindBlobByIDNonNil(ctx context.Context, blobID string) (*enti
 	}
 	return rlt, nil
 }
+
+func (r *BlobRepo) FindBlobByUserType(ctx context.Context, userID string, blobType int8) (*entity.Blob, error) {
+	return r.blobDal.SelectBlobByUserType(ctx, userID, blobType)
+}
+
+func (r *BlobRepo) FindBlobByUserTypeNonNil(ctx context.Context, userID string, blobType int8) (*entity.Blob, error) {
+	rlt, err := r.FindBlobByUserType(ctx, userID, blobType)
+	if err != nil {
+		return nil, err
+	}
+	if rlt == nil {
+		return nil, errno.RecordNotFound
+	}
+	return rlt, nil
+}

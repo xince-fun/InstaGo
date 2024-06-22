@@ -8,23 +8,24 @@ import (
 )
 
 type Blob struct {
-	BlobID   string
-	UserID   string
-	URL      string
-	BlobType int8
-	events   []event.BlobEvent
+	BlobID     string
+	UserID     string
+	ObjectName string
+	BlobType   int8
+	events     []event.BlobEvent
 }
 
 func (b *Blob) NotifyUpload() error {
 	id, err := uuid.NewV7()
 	if err != nil {
 		klog.Errorf("uuid.NewV7() failed: %v", err)
+		return err
 	}
 	b.RaiseEvent(&event.BlobUploadedEvent{
 		EventId:    id.String(),
 		BlobID:     b.BlobID,
 		UserID:     b.UserID,
-		URL:        b.URL,
+		ObjectName: b.ObjectName,
 		BlobType:   b.BlobType,
 		UploadTime: time.Now(),
 	})

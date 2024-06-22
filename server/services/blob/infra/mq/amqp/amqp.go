@@ -47,7 +47,8 @@ func (p *Publisher) Publish(ctx context.Context, msg []byte) error {
 		false,
 		false,
 		amqp.Publishing{
-			Body: msg,
+			ContentType: "text/plain",
+			Body:        msg,
 		},
 	)
 }

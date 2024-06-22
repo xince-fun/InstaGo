@@ -16,7 +16,7 @@ const (
 	PREFIX    = "conf"
 	CONF_TEST = "conf-test.yaml"
 	CONF_PROD = "conf-prod.yaml"
-	CONF_DEV  = "conf-dev.yaml.yaml"
+	CONF_DEV  = "conf-dev.yaml"
 )
 
 func InitConfig() {

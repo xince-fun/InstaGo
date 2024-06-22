@@ -16,6 +16,8 @@ type BlobRepository interface {
 	SaveBlob(context.Context, *entity.Blob) (err error)
 	FindBlobByID(context.Context, string) (*entity.Blob, error)
 	FindBlobByIDNonNil(context.Context, string) (*entity.Blob, error)
+	FindBlobByUserType(context.Context, string, int8) (*entity.Blob, error)
+	FindBlobByUserTypeNonNil(context.Context, string, int8) (*entity.Blob, error)
 }
 
 var BlobRepositorySet = wire.NewSet(

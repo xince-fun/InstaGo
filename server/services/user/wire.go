@@ -11,6 +11,7 @@ import (
 func InitializeService() *UserServiceImpl {
 	wire.Build(
 		UserServiceImplSet,
+		initialize.InitBlob,
 		initialize.InitDB,
 	)
 

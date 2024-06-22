@@ -4,10 +4,12 @@ import (
 	"context"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/google/wire"
+	"github.com/jinzhu/copier"
 	"github.com/xince-fun/InstaGo/server/services/blob/domain/entity"
 	"github.com/xince-fun/InstaGo/server/services/blob/domain/event"
 	"github.com/xince-fun/InstaGo/server/services/blob/domain/repo"
 	"github.com/xince-fun/InstaGo/server/services/blob/infra/mq/amqp"
+	"github.com/xince-fun/InstaGo/server/shared/consts"
 )
 
 var BlobEventListenerSet = wire.NewSet(
@@ -39,16 +41,42 @@ func (e *BlobEventListener) Start(ctx context.Context) error {
 
 	for event := range eventCh {
 		blob := &entity.Blob{
-			BlobID:   event.BlobID,
-			UserID:   event.UserID,
-			URL:      event.URL,
-			BlobType: event.BlobType,
+			BlobID:     event.BlobID,
+			UserID:     event.UserID,
+			ObjectName: event.ObjectName,
+			BlobType:   event.BlobType,
 		}
-		if err = e.blobRepo.Save(ctx, blob); err != nil {
-			klog.Errorf("save blob error: %v", err)
-			continue
+		switch blob.BlobType {
+		case consts.AvatarBlobType:
+			if err = e.processAvatarBlob(ctx, blob); err != nil {
+				klog.Errorf("process avatar blob error: %v", err)
+				continue
+			}
+		default:
+			if err = e.processOtherBlob(ctx, blob); err != nil {
+				klog.Errorf("process other blob error: %v", err)
+				continue
+			}
 		}
 	}
 
 	return nil
+}
+
+func (e *BlobEventListener) processAvatarBlob(ctx context.Context, blob *entity.Blob) error {
+	blobR, err := e.blobRepo.FindBlobByUserType(ctx, blob.UserID, blob.BlobType)
+	if err != nil {
+		return err
+	}
+	if blobR != nil {
+		blobR.BlobID = blob.BlobID
+		blobR.ObjectName = blob.ObjectName
+	} else {
+		_ = copier.Copy(blobR, blob)
+	}
+	return e.blobRepo.SaveBlob(ctx, blobR)
+}
+
+func (e *BlobEventListener) processOtherBlob(ctx context.Context, blob *entity.Blob) error {
+	return e.blobRepo.SaveBlob(ctx, blob)
 }

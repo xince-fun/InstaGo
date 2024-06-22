@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/google/wire"
 	"github.com/xince-fun/InstaGo/server/services/blob/conf"
 	"github.com/xince-fun/InstaGo/server/services/blob/domain/entity"
@@ -10,7 +11,6 @@ import (
 	"github.com/xince-fun/InstaGo/server/services/blob/infra/object/minio"
 	"github.com/xince-fun/InstaGo/server/shared/errno"
 	"github.com/xince-fun/InstaGo/server/shared/kitex_gen/blob"
-	"github.com/xince-fun/InstaGo/server/shared/utils"
 	"time"
 )
 
@@ -39,10 +39,11 @@ func NewBlobApplicationService(blobRepo repo.BlobRepository, bucketManager Bucke
 }
 
 func (s *BlobApplicationService) GeneratePutPreSignedUrl(ctx context.Context, req *blob.GeneratePutPreSignedUrlRequest) (resp *blob.GeneratePutPreSignedUrlResponse, err error) {
+	resp = new(blob.GeneratePutPreSignedUrlResponse)
+
 	blobID, err := s.blobRepo.NextIdentity()
 	if err != nil {
-		resp.BaseResp = utils.BuildBaseResp(errno.BlobSrvError)
-		return resp, nil
+		return nil, errno.BlobSrvError
 	}
 
 	objectName := fmt.Sprintf("%s/%d/%s", req.UserId, req.BlobType, blobID)
@@ -50,36 +51,33 @@ func (s *BlobApplicationService) GeneratePutPreSignedUrl(ctx context.Context, re
 
 	url, err := s.bucketManager.GeneratePutObjectSignedURL(ctx, bucketName, objectName, time.Duration(req.Timeout)*time.Second)
 	if err != nil {
-		resp.BaseResp = utils.BuildBaseResp(errno.BlobSrvError)
-		return resp, nil
+		return nil, errno.BlobSrvError
 	}
 
 	resp = &blob.GeneratePutPreSignedUrlResponse{
-		BaseResp: utils.BuildBaseResp(nil),
-		Url:      url,
-		Id:       blobID,
+		Url:        url,
+		Id:         blobID,
+		ObjectName: objectName,
 	}
 	return resp, nil
 }
 
 func (s *BlobApplicationService) GenerateGetPreSignedUrl(ctx context.Context, req *blob.GenerateGetPreSignedUrlRequest) (resp *blob.GenerateGetPreSignedUrlResponse, err error) {
+	resp = new(blob.GenerateGetPreSignedUrlResponse)
 
 	blobR, err := s.blobRepo.FindBlobByIDNonNil(ctx, req.BlobId)
 	if err != nil {
-		resp.BaseResp = utils.BuildBaseResp(errno.BlobSrvError)
-		return resp, nil
+		return resp, errno.RecordNotFound
 	}
-
 	bucketName := conf.GlobalServerConf.BucketConfig.AvatarBucket
-	url, err := s.bucketManager.GenerateGetObjectSignedURL(ctx, bucketName, blobR.URL, time.Duration(req.Timeout)*time.Second)
+	url, err := s.bucketManager.GenerateGetObjectSignedURL(ctx, bucketName, blobR.ObjectName, time.Duration(req.Timeout)*time.Second)
 	if err != nil {
-		resp.BaseResp = utils.BuildBaseResp(errno.BlobSrvError)
-		return resp, nil
+		klog.Infof("error: %v", err)
+		return resp, errno.BlobSrvError
 	}
 
 	resp = &blob.GenerateGetPreSignedUrlResponse{
-		BaseResp: utils.BuildBaseResp(nil),
-		Url:      url,
+		Url: url,
 	}
 	return resp, nil
 }
@@ -87,17 +85,19 @@ func (s *BlobApplicationService) GenerateGetPreSignedUrl(ctx context.Context, re
 func (s *BlobApplicationService) NotifyBlobUpload(ctx context.Context, req *blob.NotifyBlobUploadRequest) (resp *blob.NotifyBlobUploadResponse, err error) {
 	resp = new(blob.NotifyBlobUploadResponse)
 
-	b := &entity.Blob{}
+	b := &entity.Blob{
+		BlobID:     req.BlobId,
+		UserID:     req.UserId,
+		ObjectName: req.ObjectName,
+		BlobType:   req.BlobType,
+	}
 	if err = b.NotifyUpload(); err != nil {
-		resp.BaseResp = utils.BuildBaseResp(errno.BlobSrvError)
-		return resp, nil
+		return nil, errno.BlobSrvError
 	}
 
 	if err = s.blobRepo.Save(ctx, b); err != nil {
-		resp.BaseResp = utils.BuildBaseResp(errno.BlobSrvError)
-		return resp, nil
+		return resp, errno.BlobSrvError
 	}
 
-	resp.BaseResp = utils.BuildBaseResp(nil)
 	return resp, nil
 }

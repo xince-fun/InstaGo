@@ -19,6 +19,9 @@ type Client interface {
 	UpdatePhone(ctx context.Context, req *user.UpdatePhoneRequest, callOptions ...callopt.Option) (r *user.UpdatePhoneResponse, err error)
 	UpdatePasswd(ctx context.Context, req *user.UpdatePasswdRequest, callOptions ...callopt.Option) (r *user.UpdatePasswdResponse, err error)
 	UpdateBirthDay(ctx context.Context, req *user.UpdateBirthDayRequest, callOptions ...callopt.Option) (r *user.UpdateBirthDayResponse, err error)
+	UploadAvatar(ctx context.Context, req *user.UploadAvatarRequest, callOptions ...callopt.Option) (r *user.UploadAvatarResponse, err error)
+	UpdateAvatarInfo(ctx context.Context, req *user.UpdateAvatarInfoRequest, callOptions ...callopt.Option) (r *user.UpdateAvatarInfoResponse, err error)
+	GetAvatar(ctx context.Context, req *user.GetAvatarRequest, callOptions ...callopt.Option) (r *user.GetAvatarResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -88,4 +91,19 @@ func (p *kUserServiceClient) UpdatePasswd(ctx context.Context, req *user.UpdateP
 func (p *kUserServiceClient) UpdateBirthDay(ctx context.Context, req *user.UpdateBirthDayRequest, callOptions ...callopt.Option) (r *user.UpdateBirthDayResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.UpdateBirthDay(ctx, req)
+}
+
+func (p *kUserServiceClient) UploadAvatar(ctx context.Context, req *user.UploadAvatarRequest, callOptions ...callopt.Option) (r *user.UploadAvatarResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.UploadAvatar(ctx, req)
+}
+
+func (p *kUserServiceClient) UpdateAvatarInfo(ctx context.Context, req *user.UpdateAvatarInfoRequest, callOptions ...callopt.Option) (r *user.UpdateAvatarInfoResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.UpdateAvatarInfo(ctx, req)
+}
+
+func (p *kUserServiceClient) GetAvatar(ctx context.Context, req *user.GetAvatarRequest, callOptions ...callopt.Option) (r *user.GetAvatarResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetAvatar(ctx, req)
 }

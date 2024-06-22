@@ -57,3 +57,21 @@ func _updatepasswdMw() []app.HandlerFunc {
 		common.PasetoAuth(consts.User),
 	}
 }
+
+func _uploadavatarMw() []app.HandlerFunc {
+	return []app.HandlerFunc{
+		common.PasetoAuth(consts.User),
+	}
+}
+
+func _updateavatarinfoMw() []app.HandlerFunc {
+	return []app.HandlerFunc{
+		common.PasetoAuth(consts.User),
+	}
+}
+
+func _getavatarMw() []app.HandlerFunc {
+	return []app.HandlerFunc{
+		common.PasetoAuth(consts.User),
+	}
+}

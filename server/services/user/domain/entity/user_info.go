@@ -27,6 +27,6 @@ func (u *UserInfo) SetAccount(account string) {
 	u.Account = account
 }
 
-func (u *UserInfo) SetAvatarUrl(avatarID string) {
+func (u *UserInfo) SetAvatarID(avatarID string) {
 	u.AvatarID = avatarID
 }

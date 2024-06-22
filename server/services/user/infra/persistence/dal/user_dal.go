@@ -72,7 +72,7 @@ func (d *UserDal) UpsertInfo(ctx context.Context, userInfo *entity.UserInfo, tx 
 
 	err = tx.WithContext(ctx).Clauses(clause.OnConflict{
 		Columns: []clause.Column{{Name: "user_id"}},
-		DoUpdates: clause.AssignmentColumns([]string{"account", "full_name", "avatar_url",
+		DoUpdates: clause.AssignmentColumns([]string{"account", "full_name", "avatar_id",
 			"is_deleted", "update_time"}),
 	}).Create(userInfoPo).Error
 

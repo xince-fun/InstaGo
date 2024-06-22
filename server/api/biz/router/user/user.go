@@ -23,12 +23,15 @@ func Register(r *server.Hertz) {
 			_v1 := _api.Group("/v1", _v1Mw()...)
 			{
 				_user := _v1.Group("/user", _userMw()...)
+				_user.POST("/avatar", append(_uploadavatarMw(), user.UploadAvatar)...)
+				_user.PUT("/avatar", append(_updateavatarinfoMw(), user.UpdateAvatarInfo)...)
+				_user.GET("/avatar", append(_getavatarMw(), user.GetAvatar)...)
+				_user.PUT("/birthday", append(_updatebirthdayMw(), user.UpdateBirthDay)...)
+				_user.PUT("/email", append(_updateemailMw(), user.UpdateEmail)...)
 				_user.POST("/login", append(_loginMw(), user.Login)...)
+				_user.PUT("/passwd", append(_updatepasswdMw(), user.UpdatePasswd)...)
+				_user.PUT("/phone", append(_updatephoneMw(), user.UpdatePhone)...)
 				_user.POST("/register", append(_registerMw(), user.Register)...)
-				_user.POST("/update_birthday", append(_updatebirthdayMw(), user.UpdateBirthDay)...)
-				_user.POST("/update_email", append(_updateemailMw(), user.UpdateEmail)...)
-				_user.POST("/update_passwd", append(_updatepasswdMw(), user.UpdatePasswd)...)
-				_user.POST("/update_phone", append(_updatephoneMw(), user.UpdatePhone)...)
 			}
 		}
 	}

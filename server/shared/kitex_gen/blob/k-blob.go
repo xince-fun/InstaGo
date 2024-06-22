@@ -275,7 +275,7 @@ func (p *GeneratePutPreSignedUrlResponse) FastRead(buf []byte) (int, error) {
 		}
 		switch fieldId {
 		case 1:
-			if fieldTypeId == thrift.STRUCT {
+			if fieldTypeId == thrift.STRING {
 				l, err = p.FastReadField1(buf[offset:])
 				offset += l
 				if err != nil {
@@ -354,13 +354,14 @@ ReadStructEndError:
 func (p *GeneratePutPreSignedUrlResponse) FastReadField1(buf []byte) (int, error) {
 	offset := 0
 
-	tmp := base.NewBaseResponse()
-	if l, err := tmp.FastRead(buf[offset:]); err != nil {
+	if v, l, err := bthrift.Binary.ReadString(buf[offset:]); err != nil {
 		return offset, err
 	} else {
 		offset += l
+
+		p.Url = v
+
 	}
-	p.BaseResp = tmp
 	return offset, nil
 }
 
@@ -372,7 +373,7 @@ func (p *GeneratePutPreSignedUrlResponse) FastReadField2(buf []byte) (int, error
 	} else {
 		offset += l
 
-		p.Url = v
+		p.Id = v
 
 	}
 	return offset, nil
@@ -386,7 +387,7 @@ func (p *GeneratePutPreSignedUrlResponse) FastReadField3(buf []byte) (int, error
 	} else {
 		offset += l
 
-		p.Id = v
+		p.ObjectName = v
 
 	}
 	return offset, nil
@@ -425,16 +426,17 @@ func (p *GeneratePutPreSignedUrlResponse) BLength() int {
 
 func (p *GeneratePutPreSignedUrlResponse) fastWriteField1(buf []byte, binaryWriter bthrift.BinaryWriter) int {
 	offset := 0
-	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "base_resp", thrift.STRUCT, 1)
-	offset += p.BaseResp.FastWriteNocopy(buf[offset:], binaryWriter)
+	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "url", thrift.STRING, 1)
+	offset += bthrift.Binary.WriteStringNocopy(buf[offset:], binaryWriter, p.Url)
+
 	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
 	return offset
 }
 
 func (p *GeneratePutPreSignedUrlResponse) fastWriteField2(buf []byte, binaryWriter bthrift.BinaryWriter) int {
 	offset := 0
-	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "url", thrift.STRING, 2)
-	offset += bthrift.Binary.WriteStringNocopy(buf[offset:], binaryWriter, p.Url)
+	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "id", thrift.STRING, 2)
+	offset += bthrift.Binary.WriteStringNocopy(buf[offset:], binaryWriter, p.Id)
 
 	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
 	return offset
@@ -442,8 +444,8 @@ func (p *GeneratePutPreSignedUrlResponse) fastWriteField2(buf []byte, binaryWrit
 
 func (p *GeneratePutPreSignedUrlResponse) fastWriteField3(buf []byte, binaryWriter bthrift.BinaryWriter) int {
 	offset := 0
-	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "id", thrift.STRING, 3)
-	offset += bthrift.Binary.WriteStringNocopy(buf[offset:], binaryWriter, p.Id)
+	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "object_name", thrift.STRING, 3)
+	offset += bthrift.Binary.WriteStringNocopy(buf[offset:], binaryWriter, p.ObjectName)
 
 	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
 	return offset
@@ -451,16 +453,17 @@ func (p *GeneratePutPreSignedUrlResponse) fastWriteField3(buf []byte, binaryWrit
 
 func (p *GeneratePutPreSignedUrlResponse) field1Length() int {
 	l := 0
-	l += bthrift.Binary.FieldBeginLength("base_resp", thrift.STRUCT, 1)
-	l += p.BaseResp.BLength()
+	l += bthrift.Binary.FieldBeginLength("url", thrift.STRING, 1)
+	l += bthrift.Binary.StringLengthNocopy(p.Url)
+
 	l += bthrift.Binary.FieldEndLength()
 	return l
 }
 
 func (p *GeneratePutPreSignedUrlResponse) field2Length() int {
 	l := 0
-	l += bthrift.Binary.FieldBeginLength("url", thrift.STRING, 2)
-	l += bthrift.Binary.StringLengthNocopy(p.Url)
+	l += bthrift.Binary.FieldBeginLength("id", thrift.STRING, 2)
+	l += bthrift.Binary.StringLengthNocopy(p.Id)
 
 	l += bthrift.Binary.FieldEndLength()
 	return l
@@ -468,8 +471,8 @@ func (p *GeneratePutPreSignedUrlResponse) field2Length() int {
 
 func (p *GeneratePutPreSignedUrlResponse) field3Length() int {
 	l := 0
-	l += bthrift.Binary.FieldBeginLength("id", thrift.STRING, 3)
-	l += bthrift.Binary.StringLengthNocopy(p.Id)
+	l += bthrift.Binary.FieldBeginLength("object_name", thrift.STRING, 3)
+	l += bthrift.Binary.StringLengthNocopy(p.ObjectName)
 
 	l += bthrift.Binary.FieldEndLength()
 	return l
@@ -675,20 +678,6 @@ func (p *GenerateGetPreSignedUrlResponse) FastRead(buf []byte) (int, error) {
 			break
 		}
 		switch fieldId {
-		case 1:
-			if fieldTypeId == thrift.STRUCT {
-				l, err = p.FastReadField1(buf[offset:])
-				offset += l
-				if err != nil {
-					goto ReadFieldError
-				}
-			} else {
-				l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
-				offset += l
-				if err != nil {
-					goto SkipFieldError
-				}
-			}
 		case 2:
 			if fieldTypeId == thrift.STRING {
 				l, err = p.FastReadField2(buf[offset:])
@@ -738,19 +727,6 @@ ReadStructEndError:
 	return offset, thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 }
 
-func (p *GenerateGetPreSignedUrlResponse) FastReadField1(buf []byte) (int, error) {
-	offset := 0
-
-	tmp := base.NewBaseResponse()
-	if l, err := tmp.FastRead(buf[offset:]); err != nil {
-		return offset, err
-	} else {
-		offset += l
-	}
-	p.BaseResp = tmp
-	return offset, nil
-}
-
 func (p *GenerateGetPreSignedUrlResponse) FastReadField2(buf []byte) (int, error) {
 	offset := 0
 
@@ -774,7 +750,6 @@ func (p *GenerateGetPreSignedUrlResponse) FastWriteNocopy(buf []byte, binaryWrit
 	offset := 0
 	offset += bthrift.Binary.WriteStructBegin(buf[offset:], "GenerateGetPreSignedUrlResponse")
 	if p != nil {
-		offset += p.fastWriteField1(buf[offset:], binaryWriter)
 		offset += p.fastWriteField2(buf[offset:], binaryWriter)
 	}
 	offset += bthrift.Binary.WriteFieldStop(buf[offset:])
@@ -786,20 +761,11 @@ func (p *GenerateGetPreSignedUrlResponse) BLength() int {
 	l := 0
 	l += bthrift.Binary.StructBeginLength("GenerateGetPreSignedUrlResponse")
 	if p != nil {
-		l += p.field1Length()
 		l += p.field2Length()
 	}
 	l += bthrift.Binary.FieldStopLength()
 	l += bthrift.Binary.StructEndLength()
 	return l
-}
-
-func (p *GenerateGetPreSignedUrlResponse) fastWriteField1(buf []byte, binaryWriter bthrift.BinaryWriter) int {
-	offset := 0
-	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "base_resp", thrift.STRUCT, 1)
-	offset += p.BaseResp.FastWriteNocopy(buf[offset:], binaryWriter)
-	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
-	return offset
 }
 
 func (p *GenerateGetPreSignedUrlResponse) fastWriteField2(buf []byte, binaryWriter bthrift.BinaryWriter) int {
@@ -809,14 +775,6 @@ func (p *GenerateGetPreSignedUrlResponse) fastWriteField2(buf []byte, binaryWrit
 
 	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
 	return offset
-}
-
-func (p *GenerateGetPreSignedUrlResponse) field1Length() int {
-	l := 0
-	l += bthrift.Binary.FieldBeginLength("base_resp", thrift.STRUCT, 1)
-	l += p.BaseResp.BLength()
-	l += bthrift.Binary.FieldEndLength()
-	return l
 }
 
 func (p *GenerateGetPreSignedUrlResponse) field2Length() int {
@@ -881,6 +839,20 @@ func (p *NotifyBlobUploadRequest) FastRead(buf []byte) (int, error) {
 		case 3:
 			if fieldTypeId == thrift.STRING {
 				l, err = p.FastReadField3(buf[offset:])
+				offset += l
+				if err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
+				offset += l
+				if err != nil {
+					goto SkipFieldError
+				}
+			}
+		case 4:
+			if fieldTypeId == thrift.BYTE {
+				l, err = p.FastReadField4(buf[offset:])
 				offset += l
 				if err != nil {
 					goto ReadFieldError
@@ -963,7 +935,21 @@ func (p *NotifyBlobUploadRequest) FastReadField3(buf []byte) (int, error) {
 	} else {
 		offset += l
 
-		p.Url = v
+		p.ObjectName = v
+
+	}
+	return offset, nil
+}
+
+func (p *NotifyBlobUploadRequest) FastReadField4(buf []byte) (int, error) {
+	offset := 0
+
+	if v, l, err := bthrift.Binary.ReadByte(buf[offset:]); err != nil {
+		return offset, err
+	} else {
+		offset += l
+
+		p.BlobType = v
 
 	}
 	return offset, nil
@@ -978,6 +964,7 @@ func (p *NotifyBlobUploadRequest) FastWriteNocopy(buf []byte, binaryWriter bthri
 	offset := 0
 	offset += bthrift.Binary.WriteStructBegin(buf[offset:], "NotifyBlobUploadRequest")
 	if p != nil {
+		offset += p.fastWriteField4(buf[offset:], binaryWriter)
 		offset += p.fastWriteField1(buf[offset:], binaryWriter)
 		offset += p.fastWriteField2(buf[offset:], binaryWriter)
 		offset += p.fastWriteField3(buf[offset:], binaryWriter)
@@ -994,6 +981,7 @@ func (p *NotifyBlobUploadRequest) BLength() int {
 		l += p.field1Length()
 		l += p.field2Length()
 		l += p.field3Length()
+		l += p.field4Length()
 	}
 	l += bthrift.Binary.FieldStopLength()
 	l += bthrift.Binary.StructEndLength()
@@ -1020,8 +1008,17 @@ func (p *NotifyBlobUploadRequest) fastWriteField2(buf []byte, binaryWriter bthri
 
 func (p *NotifyBlobUploadRequest) fastWriteField3(buf []byte, binaryWriter bthrift.BinaryWriter) int {
 	offset := 0
-	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "url", thrift.STRING, 3)
-	offset += bthrift.Binary.WriteStringNocopy(buf[offset:], binaryWriter, p.Url)
+	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "object_name", thrift.STRING, 3)
+	offset += bthrift.Binary.WriteStringNocopy(buf[offset:], binaryWriter, p.ObjectName)
+
+	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
+	return offset
+}
+
+func (p *NotifyBlobUploadRequest) fastWriteField4(buf []byte, binaryWriter bthrift.BinaryWriter) int {
+	offset := 0
+	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "blob_type", thrift.BYTE, 4)
+	offset += bthrift.Binary.WriteByte(buf[offset:], p.BlobType)
 
 	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
 	return offset
@@ -1047,8 +1044,17 @@ func (p *NotifyBlobUploadRequest) field2Length() int {
 
 func (p *NotifyBlobUploadRequest) field3Length() int {
 	l := 0
-	l += bthrift.Binary.FieldBeginLength("url", thrift.STRING, 3)
-	l += bthrift.Binary.StringLengthNocopy(p.Url)
+	l += bthrift.Binary.FieldBeginLength("object_name", thrift.STRING, 3)
+	l += bthrift.Binary.StringLengthNocopy(p.ObjectName)
+
+	l += bthrift.Binary.FieldEndLength()
+	return l
+}
+
+func (p *NotifyBlobUploadRequest) field4Length() int {
+	l := 0
+	l += bthrift.Binary.FieldBeginLength("blob_type", thrift.BYTE, 4)
+	l += bthrift.Binary.ByteLength(p.BlobType)
 
 	l += bthrift.Binary.FieldEndLength()
 	return l
@@ -1075,27 +1081,10 @@ func (p *NotifyBlobUploadResponse) FastRead(buf []byte) (int, error) {
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-		switch fieldId {
-		case 1:
-			if fieldTypeId == thrift.STRUCT {
-				l, err = p.FastReadField1(buf[offset:])
-				offset += l
-				if err != nil {
-					goto ReadFieldError
-				}
-			} else {
-				l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
-				offset += l
-				if err != nil {
-					goto SkipFieldError
-				}
-			}
-		default:
-			l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
-			offset += l
-			if err != nil {
-				goto SkipFieldError
-			}
+		l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
+		offset += l
+		if err != nil {
+			goto SkipFieldError
 		}
 
 		l, err = bthrift.Binary.ReadFieldEnd(buf[offset:])
@@ -1115,27 +1104,12 @@ ReadStructBeginError:
 	return offset, thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
 ReadFieldBeginError:
 	return offset, thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
-ReadFieldError:
-	return offset, thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_NotifyBlobUploadResponse[fieldId]), err)
 SkipFieldError:
 	return offset, thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
 ReadFieldEndError:
 	return offset, thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
 ReadStructEndError:
 	return offset, thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-}
-
-func (p *NotifyBlobUploadResponse) FastReadField1(buf []byte) (int, error) {
-	offset := 0
-
-	tmp := base.NewBaseResponse()
-	if l, err := tmp.FastRead(buf[offset:]); err != nil {
-		return offset, err
-	} else {
-		offset += l
-	}
-	p.BaseResp = tmp
-	return offset, nil
 }
 
 // for compatibility
@@ -1147,7 +1121,6 @@ func (p *NotifyBlobUploadResponse) FastWriteNocopy(buf []byte, binaryWriter bthr
 	offset := 0
 	offset += bthrift.Binary.WriteStructBegin(buf[offset:], "NotifyBlobUploadResponse")
 	if p != nil {
-		offset += p.fastWriteField1(buf[offset:], binaryWriter)
 	}
 	offset += bthrift.Binary.WriteFieldStop(buf[offset:])
 	offset += bthrift.Binary.WriteStructEnd(buf[offset:])
@@ -1158,26 +1131,9 @@ func (p *NotifyBlobUploadResponse) BLength() int {
 	l := 0
 	l += bthrift.Binary.StructBeginLength("NotifyBlobUploadResponse")
 	if p != nil {
-		l += p.field1Length()
 	}
 	l += bthrift.Binary.FieldStopLength()
 	l += bthrift.Binary.StructEndLength()
-	return l
-}
-
-func (p *NotifyBlobUploadResponse) fastWriteField1(buf []byte, binaryWriter bthrift.BinaryWriter) int {
-	offset := 0
-	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "base_resp", thrift.STRUCT, 1)
-	offset += p.BaseResp.FastWriteNocopy(buf[offset:], binaryWriter)
-	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
-	return offset
-}
-
-func (p *NotifyBlobUploadResponse) field1Length() int {
-	l := 0
-	l += bthrift.Binary.FieldBeginLength("base_resp", thrift.STRUCT, 1)
-	l += p.BaseResp.BLength()
-	l += bthrift.Binary.FieldEndLength()
 	return l
 }
 

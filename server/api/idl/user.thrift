@@ -33,11 +33,25 @@ struct UpdateBirthDayRequest {
     3: i32 day (api.body = "day" api.vd = "$ > 0 && $ < 32")
 }
 
+struct UploadAvatarRequest {}
+
+struct UpdateAvatarInfoRequest {
+    1: string avatar_id (api.body = "avatar_id")
+    2: string object_name (api.body = "object_name")
+    3: i8 blob_type (api.body = "blob_type")
+}
+
+struct GetAvatarRequest {}
+
 service UserService {
     base.NilResponse Login(1: LoginRequest req) (api.post = "/api/v1/user/login")
     base.NilResponse Register(1: RegisterRequest req) (api.post = "/api/v1/user/register")
-    base.NilResponse UpdateEmail(1: UpdateEmailRequest req) (api.post = "/api/v1/user/update_email")
-    base.NilResponse UpdatePhone(1: UpdatePhoneRequest req) (api.post = "/api/v1/user/update_phone")
-    base.NilResponse UpdatePasswd(1: UpdatePasswdRequest req) (api.post = "/api/v1/user/update_passwd")
-    base.NilResponse UpdateBirthDay(1: UpdateBirthDayRequest req) (api.post = "/api/v1/user/update_birthday")
+    base.NilResponse UpdateEmail(1: UpdateEmailRequest req) (api.put = "/api/v1/user/email")
+    base.NilResponse UpdatePhone(1: UpdatePhoneRequest req) (api.put = "/api/v1/user/phone")
+    base.NilResponse UpdatePasswd(1: UpdatePasswdRequest req) (api.put = "/api/v1/user/passwd")
+    base.NilResponse UpdateBirthDay(1: UpdateBirthDayRequest req) (api.put = "/api/v1/user/birthday")
+    base.NilResponse UploadAvatar(1: UploadAvatarRequest req) (api.post = "/api/v1/user/avatar")
+    base.NilResponse UpdateAvatarInfo(1: UpdateAvatarInfoRequest req) (api.put = "/api/v1/user/avatar")
+
+    base.NilResponse GetAvatar(1: GetAvatarRequest req) (api.get = "/api/v1/user/avatar")
 }

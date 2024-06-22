@@ -7,18 +7,18 @@ import (
 
 func BlobToPo(blob *entity.Blob) *po.Blob {
 	return &po.Blob{
-		BlobID:   blob.BlobID,
-		UserID:   blob.UserID,
-		URL:      blob.URL,
-		BlobType: blob.BlobType,
+		BlobID:     blob.BlobID,
+		UserID:     blob.UserID,
+		ObjectName: blob.ObjectName,
+		BlobType:   blob.BlobType,
 	}
 }
 
 func BlobToEntity(blob *po.Blob) *entity.Blob {
 	return &entity.Blob{
-		BlobID:   blob.BlobID,
-		UserID:   blob.UserID,
-		URL:      blob.URL,
-		BlobType: blob.BlobType,
+		BlobID:     blob.BlobID,
+		UserID:     blob.UserID,
+		ObjectName: blob.ObjectName,
+		BlobType:   blob.BlobType,
 	}
 }

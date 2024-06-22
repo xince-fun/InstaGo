@@ -75,6 +75,37 @@ struct UpdateBirthDayResponse {
     1: base.BaseResponse base_resp,
 }
 
+struct UploadAvatarRequest {
+    1: string user_id,
+}
+
+struct UploadAvatarResponse {
+    1: base.BaseResponse base_resp,
+    2: string avatar_url,
+    3: string avatar_id,
+    4: string object_name
+}
+
+struct UpdateAvatarInfoRequest {
+    1: string user_id,
+    2: string avatar_id,
+    3: string object_name,
+    4: i8 blob_type,
+}
+
+struct UpdateAvatarInfoResponse {
+    1: base.BaseResponse base_resp,
+}
+
+struct GetAvatarRequest {
+    1: string user_id,
+}
+
+struct GetAvatarResponse {
+    1: base.BaseResponse base_resp,
+    2: string avatar_url,
+}
+
 service UserService {
     RegisterResponse RegisterPhone(1: RegisterPhoneRequest req)
     RegisterResponse RegisterEmail(1: RegisterEmailRequest req)
@@ -84,4 +115,7 @@ service UserService {
     UpdatePhoneResponse UpdatePhone(1: UpdatePhoneRequest req)
     UpdatePasswdResponse UpdatePasswd(1: UpdatePasswdRequest req)
     UpdateBirthDayResponse UpdateBirthDay(1: UpdateBirthDayRequest req)
+    UploadAvatarResponse UploadAvatar(1: UploadAvatarRequest req)
+    UpdateAvatarInfoResponse UpdateAvatarInfo(1: UpdateAvatarInfoRequest req)
+    GetAvatarResponse GetAvatar(1: GetAvatarRequest req)
 }

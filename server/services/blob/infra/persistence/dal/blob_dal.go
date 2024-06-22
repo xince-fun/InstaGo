@@ -32,8 +32,8 @@ func (d *BlobDal) Upsert(ctx context.Context, blob *entity.Blob, tx *gorm.DB) (e
 	}
 
 	err = tx.WithContext(ctx).Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "blob_id"}},
-		DoUpdates: clause.AssignmentColumns([]string{"blob_type", "blob_url", "is_deleted", "update_time"}),
+		Columns:   []clause.Column{{Name: "id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"blob_id", "blob_type", "object_name", "is_deleted", "update_time"}),
 	}).Create(blobPo).Error
 
 	return err
@@ -47,6 +47,20 @@ func (d *BlobDal) SelectBlobByID(ctx context.Context, blobID string, tx *gorm.DB
 	}
 
 	res := tx.WithContext(ctx).Where(map[string]interface{}{"blob_id": blobID, "is_deleted": 0}).First(&blobPo)
+	if res.Error != nil {
+		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, res.Error
+	}
+	blob := converter.BlobToEntity(&blobPo)
+	return blob, nil
+}
+
+func (d *BlobDal) SelectBlobByUserType(ctx context.Context, userID string, blobType int8) (*entity.Blob, error) {
+	blobPo := po.Blob{}
+
+	res := d.db.WithContext(ctx).Where(map[string]interface{}{"user_id": userID, "blob_type": blobType, "is_deleted": 0}).First(&blobPo)
 	if res.Error != nil {
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return nil, nil

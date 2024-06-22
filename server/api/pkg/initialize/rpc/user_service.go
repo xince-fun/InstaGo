@@ -122,3 +122,30 @@ func UpdateBirthDay(ctx context.Context, req *kuser.UpdateBirthDayRequest) (resp
 	}
 	return resp, nil
 }
+
+func UploadAvatar(ctx context.Context, req *kuser.UploadAvatarRequest) (resp *kuser.UploadAvatarResponse, err error) {
+	resp, err = userClient.UploadAvatar(ctx, req)
+	if err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.ServiceErr)
+		return resp, err
+	}
+	return resp, nil
+}
+
+func UpdateAvatarInfo(ctx context.Context, req *kuser.UpdateAvatarInfoRequest) (resp *kuser.UpdateAvatarInfoResponse, err error) {
+	resp, err = userClient.UpdateAvatarInfo(ctx, req)
+	if err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.ServiceErr)
+		return resp, err
+	}
+	return resp, nil
+}
+
+func GetAvatar(ctx context.Context, req *kuser.GetAvatarRequest) (resp *kuser.GetAvatarResponse, err error) {
+	resp, err = userClient.GetAvatar(ctx, req)
+	if err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.ServiceErr)
+		return resp, err
+	}
+	return resp, nil
+}

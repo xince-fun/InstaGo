@@ -128,7 +128,7 @@ func PhoneOrEmail(phoneOrEmail string) (int, error) {
 }
 
 // UpdateEmail .
-// @router /api/v1/user/update_email [POST]
+// @router /api/v1/user/update_email [PUT]
 func UpdateEmail(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req user.UpdateEmailRequest
@@ -155,7 +155,7 @@ func UpdateEmail(ctx context.Context, c *app.RequestContext) {
 }
 
 // UpdatePhone .
-// @router /api/v1/user/update_phone [POST]
+// @router /api/v1/user/update_phone [PUT]
 func UpdatePhone(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req user.UpdatePhoneRequest
@@ -181,7 +181,7 @@ func UpdatePhone(ctx context.Context, c *app.RequestContext) {
 }
 
 // UpdatePasswd .
-// @router /api/v1/user/update_passwd [POST]
+// @router /api/v1/user/update_passwd [PUT]
 func UpdatePasswd(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req user.UpdatePasswdRequest
@@ -209,7 +209,7 @@ func UpdatePasswd(ctx context.Context, c *app.RequestContext) {
 }
 
 // UpdateBirthDay .
-// @router /api/v1/user/update_birthday [POST]
+// @router /api/v1/user/update_birthday [PUT]
 func UpdateBirthDay(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req user.UpdateBirthDayRequest
@@ -226,6 +226,87 @@ func UpdateBirthDay(ctx context.Context, c *app.RequestContext) {
 		Year:   req.Year,
 		Month:  req.Month,
 		Day:    req.Day,
+	})
+	if err != nil {
+		hlog.Error("rpc user service err", err)
+		resp.BaseResp = utils.BuildBaseResp(errno.ServiceErr)
+		c.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
+
+// UploadAvatar .
+// @router /api/v1/user/avatar [POST]
+func UploadAvatar(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req user.UploadAvatarRequest
+
+	resp := new(kuser.UploadAvatarResponse)
+	if err = c.BindAndValidate(&req); err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.ParamsErr)
+		c.JSON(http.StatusBadRequest, resp)
+		return
+	}
+
+	resp, err = rpc.UploadAvatar(ctx, &kuser.UploadAvatarRequest{
+		UserId: c.MustGet(consts.UserID).(string),
+	})
+	if err != nil {
+		hlog.Error("rpc user service err", err)
+		resp.BaseResp = utils.BuildBaseResp(errno.ServiceErr)
+		c.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
+
+// UpdateAvatarInfo .
+// @router /api/v1/user/avatar [PUT]
+func UpdateAvatarInfo(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req user.UpdateAvatarInfoRequest
+
+	resp := new(kuser.UpdateAvatarInfoResponse)
+	if err = c.BindAndValidate(&req); err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.ParamsErr)
+		c.JSON(http.StatusBadRequest, resp)
+		return
+	}
+
+	resp, err = rpc.UpdateAvatarInfo(ctx, &kuser.UpdateAvatarInfoRequest{
+		UserId:     c.MustGet(consts.UserID).(string),
+		AvatarId:   req.AvatarID,
+		ObjectName: req.ObjectName,
+		BlobType:   req.BlobType,
+	})
+	if err != nil {
+		hlog.Error("rpc user service err", err)
+		resp.BaseResp = utils.BuildBaseResp(errno.ServiceErr)
+		c.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
+
+// GetAvatar .
+// @router /api/v1/user/avatar [GET]
+func GetAvatar(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req user.GetAvatarRequest
+
+	resp := new(kuser.GetAvatarResponse)
+	if err = c.BindAndValidate(&req); err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.ParamsErr)
+		c.JSON(http.StatusBadRequest, resp)
+		return
+	}
+
+	resp, err = rpc.GetAvatar(ctx, &kuser.GetAvatarRequest{
+		UserId: c.MustGet(consts.UserID).(string),
 	})
 	if err != nil {
 		hlog.Error("rpc user service err", err)

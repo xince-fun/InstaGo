@@ -2,6 +2,7 @@ package minio
 
 import (
 	"context"
+	"fmt"
 	"github.com/google/wire"
 	"time"
 
@@ -27,6 +28,9 @@ func (m *MinioBucketManager) GenerateGetObjectSignedURL(ctx context.Context, buc
 	if err != nil {
 		return "", err
 	}
+	if url == nil {
+		return "", fmt.Errorf("get object signed url failed, url is nil")
+	}
 	return url.String(), err
 }
 
@@ -34,6 +38,9 @@ func (m *MinioBucketManager) GeneratePutObjectSignedURL(ctx context.Context, buc
 	url, err := m.client.PresignedPutObject(ctx, bucket, object, timeOut)
 	if err != nil {
 		return "", err
+	}
+	if url == nil {
+		return "", fmt.Errorf("put object signed url failed, url is nil")
 	}
 	return url.String(), err
 }

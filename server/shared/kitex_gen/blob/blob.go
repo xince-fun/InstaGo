@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/apache/thrift/lib/go/thrift"
-	"github.com/xince-fun/InstaGo/server/shared/kitex_gen/base"
 	"strings"
 )
 
@@ -293,9 +292,9 @@ func (p *GeneratePutPreSignedUrlRequest) Field3DeepEqual(src int32) bool {
 }
 
 type GeneratePutPreSignedUrlResponse struct {
-	BaseResp *base.BaseResponse `thrift:"base_resp,1" frugal:"1,default,base.BaseResponse" json:"base_resp"`
-	Url      string             `thrift:"url,2" frugal:"2,default,string" json:"url"`
-	Id       string             `thrift:"id,3" frugal:"3,default,string" json:"id"`
+	Url        string `thrift:"url,1" frugal:"1,default,string" json:"url"`
+	Id         string `thrift:"id,2" frugal:"2,default,string" json:"id"`
+	ObjectName string `thrift:"object_name,3" frugal:"3,default,string" json:"object_name"`
 }
 
 func NewGeneratePutPreSignedUrlResponse() *GeneratePutPreSignedUrlResponse {
@@ -306,15 +305,6 @@ func (p *GeneratePutPreSignedUrlResponse) InitDefault() {
 	*p = GeneratePutPreSignedUrlResponse{}
 }
 
-var GeneratePutPreSignedUrlResponse_BaseResp_DEFAULT *base.BaseResponse
-
-func (p *GeneratePutPreSignedUrlResponse) GetBaseResp() (v *base.BaseResponse) {
-	if !p.IsSetBaseResp() {
-		return GeneratePutPreSignedUrlResponse_BaseResp_DEFAULT
-	}
-	return p.BaseResp
-}
-
 func (p *GeneratePutPreSignedUrlResponse) GetUrl() (v string) {
 	return p.Url
 }
@@ -322,8 +312,9 @@ func (p *GeneratePutPreSignedUrlResponse) GetUrl() (v string) {
 func (p *GeneratePutPreSignedUrlResponse) GetId() (v string) {
 	return p.Id
 }
-func (p *GeneratePutPreSignedUrlResponse) SetBaseResp(val *base.BaseResponse) {
-	p.BaseResp = val
+
+func (p *GeneratePutPreSignedUrlResponse) GetObjectName() (v string) {
+	return p.ObjectName
 }
 func (p *GeneratePutPreSignedUrlResponse) SetUrl(val string) {
 	p.Url = val
@@ -331,15 +322,14 @@ func (p *GeneratePutPreSignedUrlResponse) SetUrl(val string) {
 func (p *GeneratePutPreSignedUrlResponse) SetId(val string) {
 	p.Id = val
 }
-
-var fieldIDToName_GeneratePutPreSignedUrlResponse = map[int16]string{
-	1: "base_resp",
-	2: "url",
-	3: "id",
+func (p *GeneratePutPreSignedUrlResponse) SetObjectName(val string) {
+	p.ObjectName = val
 }
 
-func (p *GeneratePutPreSignedUrlResponse) IsSetBaseResp() bool {
-	return p.BaseResp != nil
+var fieldIDToName_GeneratePutPreSignedUrlResponse = map[int16]string{
+	1: "url",
+	2: "id",
+	3: "object_name",
 }
 
 func (p *GeneratePutPreSignedUrlResponse) Read(iprot thrift.TProtocol) (err error) {
@@ -362,7 +352,7 @@ func (p *GeneratePutPreSignedUrlResponse) Read(iprot thrift.TProtocol) (err erro
 
 		switch fieldId {
 		case 1:
-			if fieldTypeId == thrift.STRUCT {
+			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField1(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -415,14 +405,6 @@ ReadStructEndError:
 }
 
 func (p *GeneratePutPreSignedUrlResponse) ReadField1(iprot thrift.TProtocol) error {
-	_field := base.NewBaseResponse()
-	if err := _field.Read(iprot); err != nil {
-		return err
-	}
-	p.BaseResp = _field
-	return nil
-}
-func (p *GeneratePutPreSignedUrlResponse) ReadField2(iprot thrift.TProtocol) error {
 
 	var _field string
 	if v, err := iprot.ReadString(); err != nil {
@@ -433,7 +415,7 @@ func (p *GeneratePutPreSignedUrlResponse) ReadField2(iprot thrift.TProtocol) err
 	p.Url = _field
 	return nil
 }
-func (p *GeneratePutPreSignedUrlResponse) ReadField3(iprot thrift.TProtocol) error {
+func (p *GeneratePutPreSignedUrlResponse) ReadField2(iprot thrift.TProtocol) error {
 
 	var _field string
 	if v, err := iprot.ReadString(); err != nil {
@@ -442,6 +424,17 @@ func (p *GeneratePutPreSignedUrlResponse) ReadField3(iprot thrift.TProtocol) err
 		_field = v
 	}
 	p.Id = _field
+	return nil
+}
+func (p *GeneratePutPreSignedUrlResponse) ReadField3(iprot thrift.TProtocol) error {
+
+	var _field string
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		_field = v
+	}
+	p.ObjectName = _field
 	return nil
 }
 
@@ -482,10 +475,10 @@ WriteStructEndError:
 }
 
 func (p *GeneratePutPreSignedUrlResponse) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("base_resp", thrift.STRUCT, 1); err != nil {
+	if err = oprot.WriteFieldBegin("url", thrift.STRING, 1); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := p.BaseResp.Write(oprot); err != nil {
+	if err := oprot.WriteString(p.Url); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -499,10 +492,10 @@ WriteFieldEndError:
 }
 
 func (p *GeneratePutPreSignedUrlResponse) writeField2(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("url", thrift.STRING, 2); err != nil {
+	if err = oprot.WriteFieldBegin("id", thrift.STRING, 2); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.Url); err != nil {
+	if err := oprot.WriteString(p.Id); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -516,10 +509,10 @@ WriteFieldEndError:
 }
 
 func (p *GeneratePutPreSignedUrlResponse) writeField3(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("id", thrift.STRING, 3); err != nil {
+	if err = oprot.WriteFieldBegin("object_name", thrift.STRING, 3); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.Id); err != nil {
+	if err := oprot.WriteString(p.ObjectName); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -546,35 +539,35 @@ func (p *GeneratePutPreSignedUrlResponse) DeepEqual(ano *GeneratePutPreSignedUrl
 	} else if p == nil || ano == nil {
 		return false
 	}
-	if !p.Field1DeepEqual(ano.BaseResp) {
+	if !p.Field1DeepEqual(ano.Url) {
 		return false
 	}
-	if !p.Field2DeepEqual(ano.Url) {
+	if !p.Field2DeepEqual(ano.Id) {
 		return false
 	}
-	if !p.Field3DeepEqual(ano.Id) {
+	if !p.Field3DeepEqual(ano.ObjectName) {
 		return false
 	}
 	return true
 }
 
-func (p *GeneratePutPreSignedUrlResponse) Field1DeepEqual(src *base.BaseResponse) bool {
-
-	if !p.BaseResp.DeepEqual(src) {
-		return false
-	}
-	return true
-}
-func (p *GeneratePutPreSignedUrlResponse) Field2DeepEqual(src string) bool {
+func (p *GeneratePutPreSignedUrlResponse) Field1DeepEqual(src string) bool {
 
 	if strings.Compare(p.Url, src) != 0 {
 		return false
 	}
 	return true
 }
-func (p *GeneratePutPreSignedUrlResponse) Field3DeepEqual(src string) bool {
+func (p *GeneratePutPreSignedUrlResponse) Field2DeepEqual(src string) bool {
 
 	if strings.Compare(p.Id, src) != 0 {
+		return false
+	}
+	return true
+}
+func (p *GeneratePutPreSignedUrlResponse) Field3DeepEqual(src string) bool {
+
+	if strings.Compare(p.ObjectName, src) != 0 {
 		return false
 	}
 	return true
@@ -804,8 +797,7 @@ func (p *GenerateGetPreSignedUrlRequest) Field2DeepEqual(src int32) bool {
 }
 
 type GenerateGetPreSignedUrlResponse struct {
-	BaseResp *base.BaseResponse `thrift:"base_resp,1" frugal:"1,default,base.BaseResponse" json:"base_resp"`
-	Url      string             `thrift:"url,2" frugal:"2,default,string" json:"url"`
+	Url string `thrift:"url,2" frugal:"2,default,string" json:"url"`
 }
 
 func NewGenerateGetPreSignedUrlResponse() *GenerateGetPreSignedUrlResponse {
@@ -816,32 +808,15 @@ func (p *GenerateGetPreSignedUrlResponse) InitDefault() {
 	*p = GenerateGetPreSignedUrlResponse{}
 }
 
-var GenerateGetPreSignedUrlResponse_BaseResp_DEFAULT *base.BaseResponse
-
-func (p *GenerateGetPreSignedUrlResponse) GetBaseResp() (v *base.BaseResponse) {
-	if !p.IsSetBaseResp() {
-		return GenerateGetPreSignedUrlResponse_BaseResp_DEFAULT
-	}
-	return p.BaseResp
-}
-
 func (p *GenerateGetPreSignedUrlResponse) GetUrl() (v string) {
 	return p.Url
-}
-func (p *GenerateGetPreSignedUrlResponse) SetBaseResp(val *base.BaseResponse) {
-	p.BaseResp = val
 }
 func (p *GenerateGetPreSignedUrlResponse) SetUrl(val string) {
 	p.Url = val
 }
 
 var fieldIDToName_GenerateGetPreSignedUrlResponse = map[int16]string{
-	1: "base_resp",
 	2: "url",
-}
-
-func (p *GenerateGetPreSignedUrlResponse) IsSetBaseResp() bool {
-	return p.BaseResp != nil
 }
 
 func (p *GenerateGetPreSignedUrlResponse) Read(iprot thrift.TProtocol) (err error) {
@@ -863,14 +838,6 @@ func (p *GenerateGetPreSignedUrlResponse) Read(iprot thrift.TProtocol) (err erro
 		}
 
 		switch fieldId {
-		case 1:
-			if fieldTypeId == thrift.STRUCT {
-				if err = p.ReadField1(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
 		case 2:
 			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField2(iprot); err != nil {
@@ -908,14 +875,6 @@ ReadStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 }
 
-func (p *GenerateGetPreSignedUrlResponse) ReadField1(iprot thrift.TProtocol) error {
-	_field := base.NewBaseResponse()
-	if err := _field.Read(iprot); err != nil {
-		return err
-	}
-	p.BaseResp = _field
-	return nil
-}
 func (p *GenerateGetPreSignedUrlResponse) ReadField2(iprot thrift.TProtocol) error {
 
 	var _field string
@@ -934,10 +893,6 @@ func (p *GenerateGetPreSignedUrlResponse) Write(oprot thrift.TProtocol) (err err
 		goto WriteStructBeginError
 	}
 	if p != nil {
-		if err = p.writeField1(oprot); err != nil {
-			fieldId = 1
-			goto WriteFieldError
-		}
 		if err = p.writeField2(oprot); err != nil {
 			fieldId = 2
 			goto WriteFieldError
@@ -958,23 +913,6 @@ WriteFieldStopError:
 	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
 WriteStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
-}
-
-func (p *GenerateGetPreSignedUrlResponse) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("base_resp", thrift.STRUCT, 1); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := p.BaseResp.Write(oprot); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
 }
 
 func (p *GenerateGetPreSignedUrlResponse) writeField2(oprot thrift.TProtocol) (err error) {
@@ -1008,22 +946,12 @@ func (p *GenerateGetPreSignedUrlResponse) DeepEqual(ano *GenerateGetPreSignedUrl
 	} else if p == nil || ano == nil {
 		return false
 	}
-	if !p.Field1DeepEqual(ano.BaseResp) {
-		return false
-	}
 	if !p.Field2DeepEqual(ano.Url) {
 		return false
 	}
 	return true
 }
 
-func (p *GenerateGetPreSignedUrlResponse) Field1DeepEqual(src *base.BaseResponse) bool {
-
-	if !p.BaseResp.DeepEqual(src) {
-		return false
-	}
-	return true
-}
 func (p *GenerateGetPreSignedUrlResponse) Field2DeepEqual(src string) bool {
 
 	if strings.Compare(p.Url, src) != 0 {
@@ -1033,9 +961,10 @@ func (p *GenerateGetPreSignedUrlResponse) Field2DeepEqual(src string) bool {
 }
 
 type NotifyBlobUploadRequest struct {
-	BlobId string `thrift:"blob_id,1" frugal:"1,default,string" json:"blob_id"`
-	UserId string `thrift:"user_id,2" frugal:"2,default,string" json:"user_id"`
-	Url    string `thrift:"url,3" frugal:"3,default,string" json:"url"`
+	BlobId     string `thrift:"blob_id,1" frugal:"1,default,string" json:"blob_id"`
+	UserId     string `thrift:"user_id,2" frugal:"2,default,string" json:"user_id"`
+	ObjectName string `thrift:"object_name,3" frugal:"3,default,string" json:"object_name"`
+	BlobType   int8   `thrift:"blob_type,4" frugal:"4,default,i8" json:"blob_type"`
 }
 
 func NewNotifyBlobUploadRequest() *NotifyBlobUploadRequest {
@@ -1054,8 +983,12 @@ func (p *NotifyBlobUploadRequest) GetUserId() (v string) {
 	return p.UserId
 }
 
-func (p *NotifyBlobUploadRequest) GetUrl() (v string) {
-	return p.Url
+func (p *NotifyBlobUploadRequest) GetObjectName() (v string) {
+	return p.ObjectName
+}
+
+func (p *NotifyBlobUploadRequest) GetBlobType() (v int8) {
+	return p.BlobType
 }
 func (p *NotifyBlobUploadRequest) SetBlobId(val string) {
 	p.BlobId = val
@@ -1063,14 +996,18 @@ func (p *NotifyBlobUploadRequest) SetBlobId(val string) {
 func (p *NotifyBlobUploadRequest) SetUserId(val string) {
 	p.UserId = val
 }
-func (p *NotifyBlobUploadRequest) SetUrl(val string) {
-	p.Url = val
+func (p *NotifyBlobUploadRequest) SetObjectName(val string) {
+	p.ObjectName = val
+}
+func (p *NotifyBlobUploadRequest) SetBlobType(val int8) {
+	p.BlobType = val
 }
 
 var fieldIDToName_NotifyBlobUploadRequest = map[int16]string{
 	1: "blob_id",
 	2: "user_id",
-	3: "url",
+	3: "object_name",
+	4: "blob_type",
 }
 
 func (p *NotifyBlobUploadRequest) Read(iprot thrift.TProtocol) (err error) {
@@ -1111,6 +1048,14 @@ func (p *NotifyBlobUploadRequest) Read(iprot thrift.TProtocol) (err error) {
 		case 3:
 			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField3(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 4:
+			if fieldTypeId == thrift.BYTE {
+				if err = p.ReadField4(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -1175,7 +1120,18 @@ func (p *NotifyBlobUploadRequest) ReadField3(iprot thrift.TProtocol) error {
 	} else {
 		_field = v
 	}
-	p.Url = _field
+	p.ObjectName = _field
+	return nil
+}
+func (p *NotifyBlobUploadRequest) ReadField4(iprot thrift.TProtocol) error {
+
+	var _field int8
+	if v, err := iprot.ReadByte(); err != nil {
+		return err
+	} else {
+		_field = v
+	}
+	p.BlobType = _field
 	return nil
 }
 
@@ -1195,6 +1151,10 @@ func (p *NotifyBlobUploadRequest) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField3(oprot); err != nil {
 			fieldId = 3
+			goto WriteFieldError
+		}
+		if err = p.writeField4(oprot); err != nil {
+			fieldId = 4
 			goto WriteFieldError
 		}
 	}
@@ -1250,10 +1210,10 @@ WriteFieldEndError:
 }
 
 func (p *NotifyBlobUploadRequest) writeField3(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("url", thrift.STRING, 3); err != nil {
+	if err = oprot.WriteFieldBegin("object_name", thrift.STRING, 3); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.Url); err != nil {
+	if err := oprot.WriteString(p.ObjectName); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -1264,6 +1224,23 @@ WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
+}
+
+func (p *NotifyBlobUploadRequest) writeField4(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("blob_type", thrift.BYTE, 4); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteByte(p.BlobType); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 4 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 4 end error: ", p), err)
 }
 
 func (p *NotifyBlobUploadRequest) String() string {
@@ -1286,7 +1263,10 @@ func (p *NotifyBlobUploadRequest) DeepEqual(ano *NotifyBlobUploadRequest) bool {
 	if !p.Field2DeepEqual(ano.UserId) {
 		return false
 	}
-	if !p.Field3DeepEqual(ano.Url) {
+	if !p.Field3DeepEqual(ano.ObjectName) {
+		return false
+	}
+	if !p.Field4DeepEqual(ano.BlobType) {
 		return false
 	}
 	return true
@@ -1308,14 +1288,20 @@ func (p *NotifyBlobUploadRequest) Field2DeepEqual(src string) bool {
 }
 func (p *NotifyBlobUploadRequest) Field3DeepEqual(src string) bool {
 
-	if strings.Compare(p.Url, src) != 0 {
+	if strings.Compare(p.ObjectName, src) != 0 {
+		return false
+	}
+	return true
+}
+func (p *NotifyBlobUploadRequest) Field4DeepEqual(src int8) bool {
+
+	if p.BlobType != src {
 		return false
 	}
 	return true
 }
 
 type NotifyBlobUploadResponse struct {
-	BaseResp *base.BaseResponse `thrift:"base_resp,1" frugal:"1,default,base.BaseResponse" json:"base_resp"`
 }
 
 func NewNotifyBlobUploadResponse() *NotifyBlobUploadResponse {
@@ -1326,25 +1312,7 @@ func (p *NotifyBlobUploadResponse) InitDefault() {
 	*p = NotifyBlobUploadResponse{}
 }
 
-var NotifyBlobUploadResponse_BaseResp_DEFAULT *base.BaseResponse
-
-func (p *NotifyBlobUploadResponse) GetBaseResp() (v *base.BaseResponse) {
-	if !p.IsSetBaseResp() {
-		return NotifyBlobUploadResponse_BaseResp_DEFAULT
-	}
-	return p.BaseResp
-}
-func (p *NotifyBlobUploadResponse) SetBaseResp(val *base.BaseResponse) {
-	p.BaseResp = val
-}
-
-var fieldIDToName_NotifyBlobUploadResponse = map[int16]string{
-	1: "base_resp",
-}
-
-func (p *NotifyBlobUploadResponse) IsSetBaseResp() bool {
-	return p.BaseResp != nil
-}
+var fieldIDToName_NotifyBlobUploadResponse = map[int16]string{}
 
 func (p *NotifyBlobUploadResponse) Read(iprot thrift.TProtocol) (err error) {
 
@@ -1363,20 +1331,8 @@ func (p *NotifyBlobUploadResponse) Read(iprot thrift.TProtocol) (err error) {
 		if fieldTypeId == thrift.STOP {
 			break
 		}
-
-		switch fieldId {
-		case 1:
-			if fieldTypeId == thrift.STRUCT {
-				if err = p.ReadField1(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		default:
-			if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
+		if err = iprot.Skip(fieldTypeId); err != nil {
+			goto SkipFieldTypeError
 		}
 		if err = iprot.ReadFieldEnd(); err != nil {
 			goto ReadFieldEndError
@@ -1391,10 +1347,8 @@ ReadStructBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
 ReadFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
-ReadFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_NotifyBlobUploadResponse[fieldId]), err)
-SkipFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
+SkipFieldTypeError:
+	return thrift.PrependError(fmt.Sprintf("%T skip field type %d error", p, fieldTypeId), err)
 
 ReadFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
@@ -1402,25 +1356,11 @@ ReadStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 }
 
-func (p *NotifyBlobUploadResponse) ReadField1(iprot thrift.TProtocol) error {
-	_field := base.NewBaseResponse()
-	if err := _field.Read(iprot); err != nil {
-		return err
-	}
-	p.BaseResp = _field
-	return nil
-}
-
 func (p *NotifyBlobUploadResponse) Write(oprot thrift.TProtocol) (err error) {
-	var fieldId int16
 	if err = oprot.WriteStructBegin("NotifyBlobUploadResponse"); err != nil {
 		goto WriteStructBeginError
 	}
 	if p != nil {
-		if err = p.writeField1(oprot); err != nil {
-			fieldId = 1
-			goto WriteFieldError
-		}
 	}
 	if err = oprot.WriteFieldStop(); err != nil {
 		goto WriteFieldStopError
@@ -1431,29 +1371,10 @@ func (p *NotifyBlobUploadResponse) Write(oprot thrift.TProtocol) (err error) {
 	return nil
 WriteStructBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
-WriteFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
 WriteFieldStopError:
 	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
 WriteStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
-}
-
-func (p *NotifyBlobUploadResponse) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("base_resp", thrift.STRUCT, 1); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := p.BaseResp.Write(oprot); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
 }
 
 func (p *NotifyBlobUploadResponse) String() string {
@@ -1468,17 +1389,6 @@ func (p *NotifyBlobUploadResponse) DeepEqual(ano *NotifyBlobUploadResponse) bool
 	if p == ano {
 		return true
 	} else if p == nil || ano == nil {
-		return false
-	}
-	if !p.Field1DeepEqual(ano.BaseResp) {
-		return false
-	}
-	return true
-}
-
-func (p *NotifyBlobUploadResponse) Field1DeepEqual(src *base.BaseResponse) bool {
-
-	if !p.BaseResp.DeepEqual(src) {
 		return false
 	}
 	return true
