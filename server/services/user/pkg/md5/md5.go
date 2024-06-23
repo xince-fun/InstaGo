@@ -15,7 +15,7 @@ var EncryptManagerSet = wire.NewSet(
 )
 
 func ProvideSalt() Salt {
-	return Salt(conf.GlobalServerConf.MysqlConfig.Salt)
+	return Salt(conf.GlobalServerConf.DBConfig.Salt)
 }
 
 type Salt string

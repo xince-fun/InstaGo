@@ -5,7 +5,7 @@ var (
 	GlobalConsulConf *ConsulConfig
 )
 
-type MysqlConfig struct {
+type DBConfig struct {
 	Host            string `mapstructure:"host" json:"host"`
 	Port            int    `mapstructure:"port" json:"port"`
 	DB              string `mapstructure:"db" json:"db"`
@@ -23,7 +23,7 @@ type ServerConfig struct {
 	Host         string       `mapstructure:"host" json:"host"`
 	OtelConfig   OtelConfig   `mapstructure:"otel" json:"otel"`
 	PasetoConfig PasetoConfig `mapstructure:"paseto" json:"paseto"`
-	MysqlConfig  MysqlConfig  `mapstructure:"mysql" json:"mysql"`
+	DBConfig     DBConfig     `mapstructure:"db" json:"db"`
 	BlobSrvInfo  RPCSrvConfig `mapstructure:"blob_srv" json:"blob_srv"`
 }
 

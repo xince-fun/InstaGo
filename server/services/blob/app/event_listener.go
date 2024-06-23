@@ -72,7 +72,12 @@ func (e *BlobEventListener) processAvatarBlob(ctx context.Context, blob *entity.
 		blobR.BlobID = blob.BlobID
 		blobR.ObjectName = blob.ObjectName
 	} else {
-		_ = copier.Copy(blobR, blob)
+		blobR = new(entity.Blob)
+		err = copier.Copy(blobR, blob)
+		if err != nil {
+			klog.Infof("copy blob error: %v", err)
+			return err
+		}
 	}
 	return e.blobRepo.SaveBlob(ctx, blobR)
 }

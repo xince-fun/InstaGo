@@ -10,6 +10,7 @@ const (
 
 	UserID = "userID"
 
+	PostgresDSN = "host=%s port=%d user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Shanghai"
 	MysqlDSN    = "%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local"
 	AmqpURI     = "amqp://%s:%s@%s:%d"
 	CorsAddress = "http://localhost:3000"
