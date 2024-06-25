@@ -106,6 +106,15 @@ struct GetAvatarResponse {
     2: string avatar_url,
 }
 
+struct CheckUserExistRequest {
+    1: string user_id,
+}
+
+struct CheckUserExistResponse {
+    1: base.BaseResponse base_resp,
+    2: bool is_exist,
+}
+
 service UserService {
     RegisterResponse RegisterPhone(1: RegisterPhoneRequest req)
     RegisterResponse RegisterEmail(1: RegisterEmailRequest req)
@@ -118,4 +127,6 @@ service UserService {
     UploadAvatarResponse UploadAvatar(1: UploadAvatarRequest req)
     UpdateAvatarInfoResponse UpdateAvatarInfo(1: UpdateAvatarInfoRequest req)
     GetAvatarResponse GetAvatar(1: GetAvatarRequest req)
+
+    CheckUserExistResponse CheckUserExist(1: CheckUserExistRequest req)
 }

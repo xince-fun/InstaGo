@@ -2,11 +2,14 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/google/uuid"
 	"github.com/google/wire"
 	"github.com/xince-fun/InstaGo/server/services/user/domain/entity"
 	"github.com/xince-fun/InstaGo/server/services/user/domain/repo"
+	"github.com/xince-fun/InstaGo/server/services/user/infra/cache"
 	"github.com/xince-fun/InstaGo/server/services/user/infra/sal"
 	"github.com/xince-fun/InstaGo/server/services/user/pkg/md5"
 	"github.com/xince-fun/InstaGo/server/services/user/pkg/paseto"
@@ -25,17 +28,20 @@ var UserApplicationServiceSet = wire.NewSet(
 	md5.EncryptManagerSet,
 	paseto.TokenGeneratorSet,
 	sal.BlobManagerSet,
+	cache.CacheManagerSet,
 	NewUserApplicationService,
 	wire.Bind(new(EncryptManager), new(*md5.EncryptManager)),
 	wire.Bind(new(TokenGenerator), new(*paseto.TokenGenerator)),
 	wire.Bind(new(BlobManager), new(*sal.BlobManager)),
+	wire.Bind(new(CacheManager), new(*cache.RedisManager)),
 )
 
 type UserApplicationService struct {
 	userRepo       repo.UserRepository
 	encryptManager EncryptManager
 	tokenGenerator TokenGenerator
-	BlobManager    BlobManager
+	blobManager    BlobManager
+	cacheManager   CacheManager
 }
 
 type EncryptManager interface {
@@ -52,13 +58,19 @@ type BlobManager interface {
 	NotifyBlobUpload(context.Context, *blob.NotifyBlobUploadRequest) (*blob.NotifyBlobUploadResponse, error)
 }
 
+type CacheManager interface {
+	Get(context.Context, string, interface{}) error
+	Set(context.Context, string, cache.CacheItem) error
+}
+
 func NewUserApplicationService(userRepo repo.UserRepository, encryptManager EncryptManager,
-	tokenGenerator TokenGenerator, blobManager BlobManager) *UserApplicationService {
+	tokenGenerator TokenGenerator, blobManager BlobManager, cacheManager CacheManager) *UserApplicationService {
 	return &UserApplicationService{
 		userRepo:       userRepo,
 		encryptManager: encryptManager,
 		tokenGenerator: tokenGenerator,
-		BlobManager:    blobManager,
+		blobManager:    blobManager,
+		cacheManager:   cacheManager,
 	}
 }
 
@@ -138,7 +150,7 @@ func (s *UserApplicationService) LoginPhone(ctx context.Context, req *user.Login
 
 	usrAccount, err := s.userRepo.FindUserAccountByPhoneNumberNonNil(ctx, req.Account)
 	if err != nil {
-		resp.BaseResp = utils.BuildBaseResp(errno.RecordNotFound)
+		resp.BaseResp = utils.BuildBaseResp(errno.UserNotExistError)
 		return resp, nil
 	}
 
@@ -163,7 +175,7 @@ func (s *UserApplicationService) LoginEmail(ctx context.Context, req *user.Login
 
 	usrAccount, err := s.userRepo.FindUserAccountByEmailNonNil(ctx, req.Account)
 	if err != nil {
-		resp.BaseResp = utils.BuildBaseResp(errno.RecordNotFound)
+		resp.BaseResp = utils.BuildBaseResp(errno.UserNotExistError)
 		return resp, nil
 	}
 
@@ -212,7 +224,7 @@ func (s *UserApplicationService) UpdateEmail(ctx context.Context, req *user.Upda
 
 	usrAccount, err := s.userRepo.FindUserAccountByUserIDNonNil(ctx, req.UserId)
 	if err != nil {
-		resp.BaseResp = utils.BuildBaseResp(errno.RecordNotFound)
+		resp.BaseResp = utils.BuildBaseResp(errno.UserNotExistError)
 		return resp, nil
 	}
 
@@ -235,7 +247,7 @@ func (s *UserApplicationService) UpdatePhone(ctx context.Context, req *user.Upda
 
 	usrAccount, err := s.userRepo.FindUserAccountByUserIDNonNil(ctx, req.UserId)
 	if err != nil {
-		resp.BaseResp = utils.BuildBaseResp(errno.RecordNotFound)
+		resp.BaseResp = utils.BuildBaseResp(errno.UserNotExistError)
 		return resp, nil
 	}
 
@@ -259,7 +271,7 @@ func (s *UserApplicationService) UpdatePasswd(ctx context.Context, req *user.Upd
 
 	usrAccount, err := s.userRepo.FindUserAccountByUserIDNonNil(ctx, req.UserId)
 	if err != nil {
-		resp.BaseResp = utils.BuildBaseResp(errno.RecordNotFound)
+		resp.BaseResp = utils.BuildBaseResp(errno.UserNotExistError)
 		return resp, nil
 	}
 
@@ -288,7 +300,7 @@ func (s *UserApplicationService) UpdateBirthDay(ctx context.Context, req *user.U
 
 	usrProfile, err := s.userRepo.FindUserProfileByUserIDNonNil(ctx, req.UserId)
 	if err != nil {
-		resp.BaseResp = utils.BuildBaseResp(errno.RecordNotFound)
+		resp.BaseResp = utils.BuildBaseResp(errno.UserNotExistError)
 		return resp, nil
 	}
 
@@ -311,11 +323,11 @@ func (s *UserApplicationService) UploadAvatar(ctx context.Context, req *user.Upl
 
 	_, err = s.userRepo.FindUserInfoByUserIDNonNil(ctx, req.UserId)
 	if err != nil {
-		resp.BaseResp = utils.BuildBaseResp(errno.RecordNotFound)
+		resp.BaseResp = utils.BuildBaseResp(errno.UserNotExistError)
 		return resp, nil
 	}
 
-	blobResp, err := s.BlobManager.UploadBlob(ctx, &blob.GeneratePutPreSignedUrlRequest{
+	blobResp, err := s.blobManager.UploadBlob(ctx, &blob.GeneratePutPreSignedUrlRequest{
 		UserId:   req.UserId,
 		BlobType: consts.AvatarBlobType,
 		Timeout:  int32(10 * time.Second.Seconds()),
@@ -337,11 +349,11 @@ func (s *UserApplicationService) UpdateAvatarInfo(ctx context.Context, req *user
 
 	usrInfo, err := s.userRepo.FindUserInfoByUserIDNonNil(ctx, req.UserId)
 	if err != nil {
-		resp.BaseResp = utils.BuildBaseResp(errno.RecordNotFound)
+		resp.BaseResp = utils.BuildBaseResp(errno.UserNotExistError)
 		return resp, nil
 	}
 
-	_, err = s.BlobManager.NotifyBlobUpload(ctx, &blob.NotifyBlobUploadRequest{
+	_, err = s.blobManager.NotifyBlobUpload(ctx, &blob.NotifyBlobUploadRequest{
 		BlobId:     req.AvatarId,
 		UserId:     req.UserId,
 		ObjectName: req.ObjectName,
@@ -365,14 +377,27 @@ func (s *UserApplicationService) UpdateAvatarInfo(ctx context.Context, req *user
 func (s *UserApplicationService) GetAvatar(ctx context.Context, req *user.GetAvatarRequest) (resp *user.GetAvatarResponse, err error) {
 	resp = new(user.GetAvatarResponse)
 
-	usrInfo, err := s.userRepo.FindUserInfoByUserIDNonNil(ctx, req.UserId)
-	if err != nil {
-		resp.BaseResp = utils.BuildBaseResp(errno.RecordNotFound)
-		return resp, nil
+	value := cache.AvatarItem{}
+	avatarId := ""
+	if err = s.cacheManager.Get(ctx, fmt.Sprintf(consts.BlobRedisKey, req.UserId, consts.AvatarBlobType), &value); err == nil && value.IsDirty() {
+		avatarId = value.BlobID
+	} else {
+		usrInfo, err := s.userRepo.FindUserInfoByUserIDNonNil(ctx, req.UserId)
+		if err != nil {
+			resp.BaseResp = utils.BuildBaseResp(errno.UserNotExistError)
+			return resp, nil
+		}
+		avatarId = usrInfo.AvatarID
+		go func() {
+			if err := s.cacheManager.Set(ctx, fmt.Sprintf(consts.BlobRedisKey, req.UserId, consts.AvatarBlobType),
+				&cache.AvatarItem{BlobID: avatarId}); err != nil {
+				klog.Infof("write cache error: %v", err)
+			}
+		}()
 	}
 
-	blobResp, err := s.BlobManager.GetBlob(ctx, &blob.GenerateGetPreSignedUrlRequest{
-		BlobId:  usrInfo.AvatarID,
+	blobResp, err := s.blobManager.GetBlob(ctx, &blob.GenerateGetPreSignedUrlRequest{
+		BlobId:  avatarId,
 		Timeout: int32(60 * time.Second.Seconds()),
 	})
 	if err != nil {
@@ -382,5 +407,22 @@ func (s *UserApplicationService) GetAvatar(ctx context.Context, req *user.GetAva
 
 	resp.AvatarUrl = blobResp.Url
 	resp.BaseResp = utils.BuildBaseResp(nil)
+	return resp, nil
+}
+
+func (s *UserApplicationService) CheckUserExist(ctx context.Context, req *user.CheckUserExistRequest) (resp *user.CheckUserExistResponse, err error) {
+	resp = new(user.CheckUserExistResponse)
+
+	userAccount, err := s.userRepo.FindUserAccountByUserID(ctx, req.UserId)
+	if err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.UserNotExistError)
+		return resp, err
+	}
+
+	resp.BaseResp = utils.BuildBaseResp(nil)
+	if userAccount == nil {
+		return resp, nil
+	}
+	resp.IsExist = true
 	return resp, nil
 }

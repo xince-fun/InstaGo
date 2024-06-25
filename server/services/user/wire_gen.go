@@ -8,6 +8,7 @@ package main
 
 import (
 	"github.com/xince-fun/InstaGo/server/services/user/app"
+	"github.com/xince-fun/InstaGo/server/services/user/infra/cache"
 	"github.com/xince-fun/InstaGo/server/services/user/infra/persistence"
 	"github.com/xince-fun/InstaGo/server/services/user/infra/persistence/dal"
 	"github.com/xince-fun/InstaGo/server/services/user/infra/sal"
@@ -29,7 +30,9 @@ func InitializeService() *UserServiceImpl {
 	tokenGenerator := paseto.NewTokenGenerator(asymmetricKey, implicit)
 	client := initialize.InitBlob()
 	blobManager := sal.NewBlobManager(client)
-	userApplicationService := app.NewUserApplicationService(userRepo, encryptManager, tokenGenerator, blobManager)
+	cacheCache := cache.NewCache()
+	redisManager := cache.NewRedisManager(cacheCache)
+	userApplicationService := app.NewUserApplicationService(userRepo, encryptManager, tokenGenerator, blobManager, redisManager)
 	userServiceImpl := NewUserServiceImpl(userApplicationService)
 	return userServiceImpl
 }

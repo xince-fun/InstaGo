@@ -11,18 +11,24 @@ import (
 type Err int64
 
 const (
-	Err_Success        Err = 0
-	Err_BadRequest     Err = 10000
-	Err_ParamsErr      Err = 10002
-	Err_ServiceErr     Err = 20000
-	Err_UserDBErr      Err = 30000
-	Err_UserSrvErr     Err = 30001
-	Err_UserPwdErr     Err = 30002
-	Err_UserPwdSameErr Err = 30003
-	Err_BlobSrvErr     Err = 40000
-	Err_RecordNotFound Err = 80000
-	Err_RecordExist    Err = 80001
-	Err_InvalidDate    Err = 90001
+	Err_Success             Err = 0
+	Err_BadRequest          Err = 10000
+	Err_ParamsErr           Err = 10002
+	Err_ServiceErr          Err = 20000
+	Err_UserDBErr           Err = 30000
+	Err_UserSrvErr          Err = 30001
+	Err_UserPwdErr          Err = 30002
+	Err_UserPwdSameErr      Err = 30003
+	Err_UserNotExistErr     Err = 30004
+	Err_BlobSrvErr          Err = 40000
+	Err_RelationDBErr       Err = 50000
+	Err_RelationSrvErr      Err = 50001
+	Err_RelationSelfErr     Err = 50002
+	Err_RelationExistErr    Err = 50003
+	Err_RelationNotExistErr Err = 50004
+	Err_RecordNotFound      Err = 80000
+	Err_RecordExist         Err = 80001
+	Err_InvalidDate         Err = 90001
 )
 
 func (p Err) String() string {
@@ -43,8 +49,20 @@ func (p Err) String() string {
 		return "UserPwdErr"
 	case Err_UserPwdSameErr:
 		return "UserPwdSameErr"
+	case Err_UserNotExistErr:
+		return "UserNotExistErr"
 	case Err_BlobSrvErr:
 		return "BlobSrvErr"
+	case Err_RelationDBErr:
+		return "RelationDBErr"
+	case Err_RelationSrvErr:
+		return "RelationSrvErr"
+	case Err_RelationSelfErr:
+		return "RelationSelfErr"
+	case Err_RelationExistErr:
+		return "RelationExistErr"
+	case Err_RelationNotExistErr:
+		return "RelationNotExistErr"
 	case Err_RecordNotFound:
 		return "RecordNotFound"
 	case Err_RecordExist:
@@ -73,8 +91,20 @@ func ErrFromString(s string) (Err, error) {
 		return Err_UserPwdErr, nil
 	case "UserPwdSameErr":
 		return Err_UserPwdSameErr, nil
+	case "UserNotExistErr":
+		return Err_UserNotExistErr, nil
 	case "BlobSrvErr":
 		return Err_BlobSrvErr, nil
+	case "RelationDBErr":
+		return Err_RelationDBErr, nil
+	case "RelationSrvErr":
+		return Err_RelationSrvErr, nil
+	case "RelationSelfErr":
+		return Err_RelationSelfErr, nil
+	case "RelationExistErr":
+		return Err_RelationExistErr, nil
+	case "RelationNotExistErr":
+		return Err_RelationNotExistErr, nil
 	case "RecordNotFound":
 		return Err_RecordNotFound, nil
 	case "RecordExist":

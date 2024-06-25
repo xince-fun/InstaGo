@@ -8,6 +8,7 @@ import (
 	"github.com/xince-fun/InstaGo/server/services/blob/conf"
 	"github.com/xince-fun/InstaGo/server/services/blob/domain/entity"
 	"github.com/xince-fun/InstaGo/server/services/blob/domain/repo"
+	"github.com/xince-fun/InstaGo/server/services/blob/infra/cache"
 	"github.com/xince-fun/InstaGo/server/services/blob/infra/object/minio"
 	"github.com/xince-fun/InstaGo/server/shared/errno"
 	"github.com/xince-fun/InstaGo/server/shared/kitex_gen/blob"
@@ -17,13 +18,16 @@ import (
 var BlobApplicationServiceSet = wire.NewSet(
 	repo.BlobRepositorySet,
 	minio.BucketManagerSet,
+	cache.CacheManagerSet,
 	NewBlobApplicationService,
 	wire.Bind(new(BucketManager), new(*minio.MinioBucketManager)),
+	wire.Bind(new(CacheManager), new(*cache.RedisManager)),
 )
 
 type BlobApplicationService struct {
 	blobRepo      repo.BlobRepository
 	bucketManager BucketManager
+	cacheManager  CacheManager
 }
 
 type BucketManager interface {
@@ -31,10 +35,16 @@ type BucketManager interface {
 	GeneratePutObjectSignedURL(context.Context, string, string, time.Duration) (string, error)
 }
 
-func NewBlobApplicationService(blobRepo repo.BlobRepository, bucketManager BucketManager) *BlobApplicationService {
+type CacheManager interface {
+	Get(context.Context, string, interface{}) error
+	Set(context.Context, string, cache.CacheItem) error
+}
+
+func NewBlobApplicationService(blobRepo repo.BlobRepository, bucketManager BucketManager, cacheManager CacheManager) *BlobApplicationService {
 	return &BlobApplicationService{
 		blobRepo:      blobRepo,
 		bucketManager: bucketManager,
+		cacheManager:  cacheManager,
 	}
 }
 
@@ -65,12 +75,25 @@ func (s *BlobApplicationService) GeneratePutPreSignedUrl(ctx context.Context, re
 func (s *BlobApplicationService) GenerateGetPreSignedUrl(ctx context.Context, req *blob.GenerateGetPreSignedUrlRequest) (resp *blob.GenerateGetPreSignedUrlResponse, err error) {
 	resp = new(blob.GenerateGetPreSignedUrlResponse)
 
-	blobR, err := s.blobRepo.FindBlobByIDNonNil(ctx, req.BlobId)
-	if err != nil {
-		return resp, errno.RecordNotFound
+	value := cache.BlobItem{}
+	objectName := ""
+	if err = s.cacheManager.Get(ctx, req.BlobId, &value); err == nil && value.IsDirty() {
+		objectName = value.ObjectName
+	} else {
+		blobR, err := s.blobRepo.FindBlobByIDNonNil(ctx, req.BlobId)
+		if err != nil {
+			return resp, errno.RecordNotFound
+		}
+		objectName = blobR.ObjectName
+		go func() {
+			if err := s.cacheManager.Set(ctx, req.BlobId, &cache.BlobItem{BlobID: blobR.BlobID, ObjectName: blobR.ObjectName}); err != nil {
+				klog.Infof("write cache error: %v", err)
+			}
+		}()
 	}
+
 	bucketName := conf.GlobalServerConf.BucketConfig.AvatarBucket
-	url, err := s.bucketManager.GenerateGetObjectSignedURL(ctx, bucketName, blobR.ObjectName, time.Duration(req.Timeout)*time.Second)
+	url, err := s.bucketManager.GenerateGetObjectSignedURL(ctx, bucketName, objectName, time.Duration(req.Timeout)*time.Second)
 	if err != nil {
 		klog.Infof("error: %v", err)
 		return resp, errno.BlobSrvError

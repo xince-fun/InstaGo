@@ -25,6 +25,7 @@ type ServerConfig struct {
 	DBConfig     DBConfig     `mapstructure:"db" json:"db"`
 	BucketConfig BucketConfig `mapstructure:"bucket" json:"bucket"`
 	MQConfig     MQConfig     `mapstructure:"mq" json:"mq"`
+	RedisConfig  RedisConfig  `mapstructure:"redis" json:"redis"`
 }
 
 type OtelConfig struct {
@@ -50,4 +51,14 @@ type MQConfig struct {
 	Exchange string `mapstructure:"exchange" json:"exchange"`
 	User     string `mapstructure:"user" json:"user"`
 	Passwd   string `mapstructure:"passwd" json:"passwd"`
+}
+
+type RedisConfig struct {
+	RedisServerConfig []RedisServerConfig `mapstructure:"server" json:"server"`
+	LocalCacheTime    int                 `mapstructure:"local_cache" json:"local_cache"`
+}
+
+type RedisServerConfig struct {
+	Name string `mapstructure:"name" json:"name"`
+	Addr string `mapstructure:"addr" json:"addr"`
 }

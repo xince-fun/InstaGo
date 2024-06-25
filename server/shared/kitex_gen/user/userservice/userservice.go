@@ -90,6 +90,13 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
+	"CheckUserExist": kitex.NewMethodInfo(
+		checkUserExistHandler,
+		newUserServiceCheckUserExistArgs,
+		newUserServiceCheckUserExistResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
 }
 
 var (
@@ -354,6 +361,24 @@ func newUserServiceGetAvatarResult() interface{} {
 	return user.NewUserServiceGetAvatarResult()
 }
 
+func checkUserExistHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceCheckUserExistArgs)
+	realResult := result.(*user.UserServiceCheckUserExistResult)
+	success, err := handler.(user.UserService).CheckUserExist(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceCheckUserExistArgs() interface{} {
+	return user.NewUserServiceCheckUserExistArgs()
+}
+
+func newUserServiceCheckUserExistResult() interface{} {
+	return user.NewUserServiceCheckUserExistResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -469,6 +494,16 @@ func (p *kClient) GetAvatar(ctx context.Context, req *user.GetAvatarRequest) (r 
 	_args.Req = req
 	var _result user.UserServiceGetAvatarResult
 	if err = p.c.Call(ctx, "GetAvatar", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) CheckUserExist(ctx context.Context, req *user.CheckUserExistRequest) (r *user.CheckUserExistResponse, err error) {
+	var _args user.UserServiceCheckUserExistArgs
+	_args.Req = req
+	var _result user.UserServiceCheckUserExistResult
+	if err = p.c.Call(ctx, "CheckUserExist", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

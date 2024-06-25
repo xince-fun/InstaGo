@@ -77,3 +77,8 @@ func (s *UserServiceImpl) UpdateAvatarInfo(ctx context.Context, req *user.Update
 func (s *UserServiceImpl) GetAvatar(ctx context.Context, req *user.GetAvatarRequest) (resp *user.GetAvatarResponse, err error) {
 	return s.app.GetAvatar(ctx, req)
 }
+
+// CheckUserExist implements the UserServiceImpl interface.
+func (s *UserServiceImpl) CheckUserExist(ctx context.Context, req *user.CheckUserExistRequest) (resp *user.CheckUserExistResponse, err error) {
+	return s.app.CheckUserExist(ctx, req)
+}

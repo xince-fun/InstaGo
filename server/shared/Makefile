@@ -10,5 +10,10 @@ user:
 blob:
 	make service=blob generate
 
+relation:
+	make service=relation generate
+
 all:
 	make user
+	make blob
+	make follow

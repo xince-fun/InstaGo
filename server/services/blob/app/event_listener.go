@@ -8,6 +8,7 @@ import (
 	"github.com/xince-fun/InstaGo/server/services/blob/domain/entity"
 	"github.com/xince-fun/InstaGo/server/services/blob/domain/event"
 	"github.com/xince-fun/InstaGo/server/services/blob/domain/repo"
+	"github.com/xince-fun/InstaGo/server/services/blob/infra/cache"
 	"github.com/xince-fun/InstaGo/server/services/blob/infra/mq/amqp"
 	"github.com/xince-fun/InstaGo/server/shared/consts"
 )
@@ -22,12 +23,14 @@ var BlobEventListenerSet = wire.NewSet(
 type BlobEventListener struct {
 	blobRepo        repo.BlobRepository
 	eventSubscriber event.EventSubscriber
+	cacheManager    CacheManager
 }
 
-func NewBlobEventListener(blobRepo repo.BlobRepository, eventSubscriber event.EventSubscriber) *BlobEventListener {
+func NewBlobEventListener(blobRepo repo.BlobRepository, eventSubscriber event.EventSubscriber, cacheManager CacheManager) *BlobEventListener {
 	return &BlobEventListener{
 		blobRepo:        blobRepo,
 		eventSubscriber: eventSubscriber,
+		cacheManager:    cacheManager,
 	}
 }
 
@@ -58,6 +61,11 @@ func (e *BlobEventListener) Start(ctx context.Context) error {
 				continue
 			}
 		}
+		go func() {
+			if err = e.cacheManager.Set(ctx, blob.BlobID, &cache.BlobItem{BlobID: blob.BlobID, ObjectName: blob.ObjectName}); err != nil {
+				klog.Errorf("set cache error: %v", err)
+			}
+		}()
 	}
 
 	return nil

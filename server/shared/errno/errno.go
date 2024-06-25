@@ -34,16 +34,22 @@ func (e ErrNo) WithMessage(msg string) ErrNo {
 }
 
 var (
-	Success          = NewErrNo(int64(errno.Err_Success), "success")
-	BadRequest       = NewErrNo(int64(errno.Err_BadRequest), "bad request")
-	ParamsErr        = NewErrNo(int64(errno.Err_ParamsErr), "params error")
-	ServiceErr       = NewErrNo(int64(errno.Err_ServiceErr), "service error")
-	UserSrvError     = NewErrNo(int64(errno.Err_UserSrvErr), "user service error")
-	UserPwdError     = NewErrNo(int64(errno.Err_UserPwdErr), "user password error")
-	UserPwdSameError = NewErrNo(int64(errno.Err_UserPwdSameErr), "new password is the same as the old password")
-	BlobSrvError     = NewErrNo(int64(errno.Err_BlobSrvErr), "blob service error")
-	RecordNotFound   = NewErrNo(int64(errno.Err_RecordNotFound), "record not found")
-	RecordExist      = NewErrNo(int64(errno.Err_RecordExist), "record exist")
+	Success               = NewErrNo(int64(errno.Err_Success), "success")
+	BadRequest            = NewErrNo(int64(errno.Err_BadRequest), "bad request")
+	ParamsErr             = NewErrNo(int64(errno.Err_ParamsErr), "params error")
+	ServiceErr            = NewErrNo(int64(errno.Err_ServiceErr), "service error")
+	UserSrvError          = NewErrNo(int64(errno.Err_UserSrvErr), "user service error")
+	UserPwdError          = NewErrNo(int64(errno.Err_UserPwdErr), "user password error")
+	UserPwdSameError      = NewErrNo(int64(errno.Err_UserPwdSameErr), "new password is the same as the old password")
+	UserNotExistError     = NewErrNo(int64(errno.Err_UserNotExistErr), "user not exist")
+	BlobSrvError          = NewErrNo(int64(errno.Err_BlobSrvErr), "blob service error")
+	RelationDBError       = NewErrNo(int64(errno.Err_RelationDBErr), "follow db error")
+	RelationSrvError      = NewErrNo(int64(errno.Err_RelationSrvErr), "follow service error")
+	RelationSelfError     = NewErrNo(int64(errno.Err_RelationSelfErr), "can't follow self")
+	RelationExistError    = NewErrNo(int64(errno.Err_RelationExistErr), "already followed")
+	RelationNotExistError = NewErrNo(int64(errno.Err_RelationNotExistErr), "follow not exist")
+	RecordNotFound        = NewErrNo(int64(errno.Err_RecordNotFound), "record not found")
+	RecordExist           = NewErrNo(int64(errno.Err_RecordExist), "record exist")
 )
 
 var (

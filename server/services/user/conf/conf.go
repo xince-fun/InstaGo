@@ -24,6 +24,7 @@ type ServerConfig struct {
 	OtelConfig   OtelConfig   `mapstructure:"otel" json:"otel"`
 	PasetoConfig PasetoConfig `mapstructure:"paseto" json:"paseto"`
 	DBConfig     DBConfig     `mapstructure:"db" json:"db"`
+	RedisConfig  RedisConfig  `mapstructure:"redis" json:"redis"`
 	BlobSrvInfo  RPCSrvConfig `mapstructure:"blob_srv" json:"blob_srv"`
 }
 
@@ -44,4 +45,14 @@ type PasetoConfig struct {
 
 type RPCSrvConfig struct {
 	Name string `mapstructure:"name" json:"name"`
+}
+
+type RedisConfig struct {
+	RedisServerConfig []RedisServerConfig `mapstructure:"server" json:"server"`
+	LocalCacheTime    int                 `mapstructure:"local_cache" json:"local_cache"`
+}
+
+type RedisServerConfig struct {
+	Name string `mapstructure:"name" json:"name"`
+	Addr string `mapstructure:"addr" json:"addr"`
 }

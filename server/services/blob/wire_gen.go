@@ -8,6 +8,7 @@ package main
 
 import (
 	"github.com/xince-fun/InstaGo/server/services/blob/app"
+	"github.com/xince-fun/InstaGo/server/services/blob/infra/cache"
 	"github.com/xince-fun/InstaGo/server/services/blob/infra/mq/amqp"
 	"github.com/xince-fun/InstaGo/server/services/blob/infra/object/minio"
 	"github.com/xince-fun/InstaGo/server/services/blob/infra/persistence"
@@ -30,14 +31,16 @@ func InitializeService() (*BlobServiceImpl, error) {
 	blobRepo := persistence.NewBlobRepo(blobDal, eventPublisher)
 	client := initialize.InitMinio()
 	minioBucketManager := minio.NewMinioBucketManager(client)
-	blobApplicationService := app.NewBlobApplicationService(blobRepo, minioBucketManager)
+	cacheCache := cache.NewCache()
+	redisManager := cache.NewRedisManager(cacheCache)
+	blobApplicationService := app.NewBlobApplicationService(blobRepo, minioBucketManager, redisManager)
 	sExchange := amqp.ProvideSExchange()
 	subscriber, err := amqp.NewSubscriber(connection, sExchange)
 	if err != nil {
 		return nil, err
 	}
 	eventSubscriber := amqp.NewEventSubscriber(subscriber)
-	blobEventListener := app.NewBlobEventListener(blobRepo, eventSubscriber)
+	blobEventListener := app.NewBlobEventListener(blobRepo, eventSubscriber, redisManager)
 	blobServiceImpl := NewBlobServiceImpl(blobApplicationService, blobEventListener)
 	return blobServiceImpl, nil
 }

@@ -104,7 +104,7 @@ func (d *UserDal) SelectUserProfileByUserID(ctx context.Context, userID string, 
 		tx = d.db
 	}
 
-	res := d.db.WithContext(ctx).Where(map[string]interface{}{"user_id": userID, "is_deleted": 0}).First(&userProfilePo)
+	res := tx.WithContext(ctx).Where(map[string]interface{}{"user_id": userID, "is_deleted": 0}).First(&userProfilePo)
 	if res.Error != nil {
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return nil, nil
