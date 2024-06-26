@@ -30,3 +30,11 @@ func (u *UserInfo) SetAccount(account string) {
 func (u *UserInfo) SetAvatarID(avatarID string) {
 	u.AvatarID = avatarID
 }
+
+func (u *UserInfo) GetID() string {
+	return u.UserID.String()
+}
+
+func (u *UserInfo) IsDirty() bool {
+	return u.FullName != "" || u.Account != "" || u.AvatarID != ""
+}

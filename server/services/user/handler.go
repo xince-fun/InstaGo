@@ -82,3 +82,8 @@ func (s *UserServiceImpl) GetAvatar(ctx context.Context, req *user.GetAvatarRequ
 func (s *UserServiceImpl) CheckUserExist(ctx context.Context, req *user.CheckUserExistRequest) (resp *user.CheckUserExistResponse, err error) {
 	return s.app.CheckUserExist(ctx, req)
 }
+
+// GetUserInfo implements the UserServiceImpl interface.
+func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfoRequest) (resp *user.GetUserInfoResponse, err error) {
+	return s.app.GetUserInfo(ctx, req)
+}

@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -16,6 +17,7 @@ import (
 	"github.com/xince-fun/InstaGo/server/shared/consts"
 	"github.com/xince-fun/InstaGo/server/shared/errno"
 	"github.com/xince-fun/InstaGo/server/shared/kitex_gen/blob"
+	"github.com/xince-fun/InstaGo/server/shared/kitex_gen/common"
 	"github.com/xince-fun/InstaGo/server/shared/kitex_gen/user"
 	"github.com/xince-fun/InstaGo/server/shared/utils"
 	"time"
@@ -379,7 +381,7 @@ func (s *UserApplicationService) GetAvatar(ctx context.Context, req *user.GetAva
 
 	value := cache.AvatarItem{}
 	avatarId := ""
-	if err = s.cacheManager.Get(ctx, fmt.Sprintf(consts.BlobRedisKey, req.UserId, consts.AvatarBlobType), &value); err == nil && value.IsDirty() {
+	if err = s.cacheManager.Get(ctx, fmt.Sprintf(consts.BlobCacheKey, req.UserId, consts.AvatarBlobType), &value); err == nil && value.IsDirty() {
 		avatarId = value.BlobID
 	} else {
 		usrInfo, err := s.userRepo.FindUserInfoByUserIDNonNil(ctx, req.UserId)
@@ -389,7 +391,7 @@ func (s *UserApplicationService) GetAvatar(ctx context.Context, req *user.GetAva
 		}
 		avatarId = usrInfo.AvatarID
 		go func() {
-			if err := s.cacheManager.Set(ctx, fmt.Sprintf(consts.BlobRedisKey, req.UserId, consts.AvatarBlobType),
+			if err := s.cacheManager.Set(ctx, fmt.Sprintf(consts.BlobCacheKey, req.UserId, consts.AvatarBlobType),
 				&cache.AvatarItem{BlobID: avatarId}); err != nil {
 				klog.Infof("write cache error: %v", err)
 			}
@@ -410,6 +412,43 @@ func (s *UserApplicationService) GetAvatar(ctx context.Context, req *user.GetAva
 	return resp, nil
 }
 
+func (s *UserApplicationService) GetUserInfo(ctx context.Context, req *user.GetUserInfoRequest) (resp *user.GetUserInfoResponse, err error) {
+	resp = new(user.GetUserInfoResponse)
+	resp.UserInfo = new(common.UserInfo)
+
+	userInfo := &entity.UserInfo{}
+	if err = s.cacheManager.Get(ctx, fmt.Sprintf(consts.UserInfoCacheKey, req.UserId), userInfo); err == nil && userInfo.IsDirty() {
+		if resp.UserInfo, err = s.toUserInfo(ctx, userInfo); err != nil {
+			resp.BaseResp = utils.BuildBaseResp(errno.UserSrvError.WithMessage(err.Error()))
+			return resp, nil
+		}
+		resp.BaseResp = utils.BuildBaseResp(nil)
+		return resp, err
+	} else {
+		userInfo, err = s.userRepo.FindUserInfoByUserIDNonNil(ctx, req.UserId)
+		if err != nil {
+			if errors.Is(err, errno.RecordNotFound) {
+				resp.BaseResp = utils.BuildBaseResp(errno.UserNotExistError)
+				return resp, err
+			} else {
+				resp.BaseResp = utils.BuildBaseResp(errno.UserSrvError)
+				return resp, err
+			}
+		}
+		if resp.UserInfo, err = s.toUserInfo(ctx, userInfo); err != nil {
+			resp.BaseResp = utils.BuildBaseResp(errno.UserSrvError.WithMessage(err.Error()))
+			return resp, nil
+		}
+		resp.BaseResp = utils.BuildBaseResp(nil)
+		go func() {
+			if err := s.cacheManager.Set(ctx, fmt.Sprintf(consts.UserInfoCacheKey, req.UserId), userInfo); err != nil {
+				klog.Infof("write cache error: %v", err)
+			}
+		}()
+		return resp, nil
+	}
+}
+
 func (s *UserApplicationService) CheckUserExist(ctx context.Context, req *user.CheckUserExistRequest) (resp *user.CheckUserExistResponse, err error) {
 	resp = new(user.CheckUserExistResponse)
 
@@ -425,4 +464,24 @@ func (s *UserApplicationService) CheckUserExist(ctx context.Context, req *user.C
 	}
 	resp.IsExist = true
 	return resp, nil
+}
+
+func (s *UserApplicationService) toUserInfo(ctx context.Context, userInfo *entity.UserInfo) (*common.UserInfo, error) {
+	if userInfo == nil {
+		return nil, fmt.Errorf("userInfo is nil")
+	}
+
+	blobResp, err := s.blobManager.GetBlob(ctx, &blob.GenerateGetPreSignedUrlRequest{
+		BlobId:  userInfo.AvatarID,
+		Timeout: int32(60 * time.Second.Seconds()),
+	})
+	if err != nil {
+		return nil, errno.BlobSrvError.WithMessage(err.Error())
+	}
+	return &common.UserInfo{
+		UserId:   userInfo.UserID.String(),
+		Avatar:   blobResp.Url,
+		FullName: userInfo.FullName,
+		Account:  userInfo.Account,
+	}, nil
 }

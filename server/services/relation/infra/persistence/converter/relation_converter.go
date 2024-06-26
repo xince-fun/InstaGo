@@ -18,3 +18,11 @@ func RelationToEntity(relation *po.Relation) *entity.Relation {
 		FolloweeID: relation.FolloweeID,
 	}
 }
+
+func RelationToEntityList(relations []*po.Relation) []*entity.Relation {
+	var entities []*entity.Relation
+	for _, relation := range relations {
+		entities = append(entities, RelationToEntity(relation))
+	}
+	return entities
+}

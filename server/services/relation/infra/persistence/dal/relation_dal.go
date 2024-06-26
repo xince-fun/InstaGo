@@ -68,6 +68,32 @@ func (d *RelationDal) CountRelation(ctx context.Context, followerID, followeeID 
 	return count, nil
 }
 
+func (d *RelationDal) CountFollowee(ctx context.Context, followerID string, tx *gorm.DB) (int64, error) {
+	if tx == nil {
+		tx = d.db
+	}
+
+	var count int64
+	res := tx.WithContext(ctx).Model(&po.Relation{}).Where(map[string]interface{}{"follower_id": followerID, "is_deleted": 0}).Count(&count)
+	if res.Error != nil {
+		return 0, res.Error
+	}
+	return count, nil
+}
+
+func (d *RelationDal) CountFollower(ctx context.Context, followeeID string, tx *gorm.DB) (int64, error) {
+	if tx == nil {
+		tx = d.db
+	}
+
+	var count int64
+	res := tx.WithContext(ctx).Model(&po.Relation{}).Where(map[string]interface{}{"followee_id": followeeID, "is_deleted": 0}).Count(&count)
+	if res.Error != nil {
+		return 0, res.Error
+	}
+	return count, nil
+}
+
 func (d *RelationDal) DeleteRelation(ctx context.Context, relation *po.Relation, tx *gorm.DB) error {
 	if tx == nil {
 		tx = d.db
@@ -79,6 +105,48 @@ func (d *RelationDal) DeleteRelation(ctx context.Context, relation *po.Relation,
 	return tx.WithContext(ctx).Model(relation).Updates(map[string]interface{}{"is_deleted": relation.IsDeleted, "update_time": relation.UpdateTime}).Error
 }
 
+func (d *RelationDal) SelectFolloweeList(ctx context.Context, followerID string, page, pageSize int, tx *gorm.DB) ([]*po.Relation, error) {
+	if tx == nil {
+		tx = d.db
+	}
+	var relationPos []*po.Relation
+	err := tx.WithContext(ctx).Scopes(Paginate(page, pageSize)).Where(map[string]interface{}{"follower_id": followerID, "is_deleted": 0}).
+		Order("create_time desc").Find(&relationPos)
+	if err.Error != nil {
+		return nil, err.Error
+	}
+	return relationPos, nil
+}
+
+func (d *RelationDal) SelectFollowerList(ctx context.Context, followeeID string, page, pageSize int, tx *gorm.DB) ([]*po.Relation, error) {
+	if tx == nil {
+		tx = d.db
+	}
+	var relationPos []*po.Relation
+	err := tx.WithContext(ctx).Scopes(Paginate(page, pageSize)).Where(map[string]interface{}{"followee_id": followeeID, "is_deleted": 0}).
+		Order("create_time desc").Find(&relationPos)
+	if err.Error != nil {
+		return nil, err.Error
+	}
+	return relationPos, nil
+}
+
 func (d *RelationDal) BeginTransaction(ctx context.Context) *gorm.DB {
 	return d.db.WithContext(ctx).Begin()
+}
+
+func Paginate(page, pageSize int) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		if page == 0 {
+			page = 1
+		}
+		switch {
+		case pageSize > 100:
+			pageSize = 100
+		case pageSize <= 0:
+			pageSize = 10
+		}
+		offset := (page - 1) * pageSize
+		return db.Offset(offset).Limit(pageSize)
+	}
 }

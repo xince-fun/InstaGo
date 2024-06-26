@@ -44,6 +44,7 @@ func Login(ctx context.Context, c *app.RequestContext) {
 		})
 		if err != nil {
 			hlog.Error("rpc user service err", err)
+			resp.BaseResp = utils.BuildBaseResp(errno.ServiceErr)
 			c.JSON(http.StatusInternalServerError, resp)
 			return
 		}
@@ -56,6 +57,7 @@ func Login(ctx context.Context, c *app.RequestContext) {
 		})
 		if err != nil {
 			hlog.Error("rpc user service err", err)
+			resp.BaseResp = utils.BuildBaseResp(errno.ServiceErr)
 			c.JSON(http.StatusInternalServerError, resp)
 			return
 		}

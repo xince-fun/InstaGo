@@ -4,5 +4,8 @@ update:
 user:
 	make service=user update
 
+relation:
+	make service=relation update
+
 all:
 	make user

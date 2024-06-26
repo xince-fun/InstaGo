@@ -21,12 +21,13 @@ type OtelConfig struct {
 }
 
 type ServerConfig struct {
-	Name        string       `mapstructure:"name" json:"name"`
-	Host        string       `mapstructure:"host" json:"host"`
-	Port        int          `mapstructure:"port" json:"port"`
-	OtelConfig  OtelConfig   `mapstructure:"otel" json:"otel"`
-	PasetoInfo  PasetoConfig `mapstructure:"paseto" json:"paseto"`
-	UserSrvInfo RPCSrvConfig `mapstructure:"user_srv" json:"user_srv"`
+	Name            string       `mapstructure:"name" json:"name"`
+	Host            string       `mapstructure:"host" json:"host"`
+	Port            int          `mapstructure:"port" json:"port"`
+	OtelConfig      OtelConfig   `mapstructure:"otel" json:"otel"`
+	PasetoInfo      PasetoConfig `mapstructure:"paseto" json:"paseto"`
+	UserSrvInfo     RPCSrvConfig `mapstructure:"user_srv" json:"user_srv"`
+	RelationSrvInfo RPCSrvConfig `mapstructure:"relation_srv" json:"relation_srv"`
 }
 
 type RPCSrvConfig struct {

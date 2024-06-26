@@ -37,7 +37,12 @@ const (
 	TimeFormat = "2006-01-02 15:04:05"
 	DateFormat = "2006-01-02"
 
-	BlobRedisKey = "blob_%s_%d"
+	UserInfoCacheKey      = "user_info_%s"
+	BlobCacheKey          = "blob_%s_%d"
+	FolloweeCountCacheKey = "followee_count_%s"
+	FollowerCountCacheKey = "follower_count_%s"
+	FolloweeListCacheKey  = "followee_list_%s"
+	FollowerListCacheKey  = "follower_list_%s"
 )
 
 const (

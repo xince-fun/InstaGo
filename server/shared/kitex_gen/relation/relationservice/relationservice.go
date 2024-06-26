@@ -27,6 +27,34 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
+	"CountFolloweeList": kitex.NewMethodInfo(
+		countFolloweeListHandler,
+		newRelationServiceCountFolloweeListArgs,
+		newRelationServiceCountFolloweeListResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
+	"CountFollowerList": kitex.NewMethodInfo(
+		countFollowerListHandler,
+		newRelationServiceCountFollowerListArgs,
+		newRelationServiceCountFollowerListResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
+	"GetFolloweeList": kitex.NewMethodInfo(
+		getFolloweeListHandler,
+		newRelationServiceGetFolloweeListArgs,
+		newRelationServiceGetFolloweeListResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
+	"GetFollowerList": kitex.NewMethodInfo(
+		getFollowerListHandler,
+		newRelationServiceGetFollowerListArgs,
+		newRelationServiceGetFollowerListResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
 }
 
 var (
@@ -129,6 +157,78 @@ func newRelationServiceUnfollowResult() interface{} {
 	return relation.NewRelationServiceUnfollowResult()
 }
 
+func countFolloweeListHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*relation.RelationServiceCountFolloweeListArgs)
+	realResult := result.(*relation.RelationServiceCountFolloweeListResult)
+	success, err := handler.(relation.RelationService).CountFolloweeList(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newRelationServiceCountFolloweeListArgs() interface{} {
+	return relation.NewRelationServiceCountFolloweeListArgs()
+}
+
+func newRelationServiceCountFolloweeListResult() interface{} {
+	return relation.NewRelationServiceCountFolloweeListResult()
+}
+
+func countFollowerListHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*relation.RelationServiceCountFollowerListArgs)
+	realResult := result.(*relation.RelationServiceCountFollowerListResult)
+	success, err := handler.(relation.RelationService).CountFollowerList(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newRelationServiceCountFollowerListArgs() interface{} {
+	return relation.NewRelationServiceCountFollowerListArgs()
+}
+
+func newRelationServiceCountFollowerListResult() interface{} {
+	return relation.NewRelationServiceCountFollowerListResult()
+}
+
+func getFolloweeListHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*relation.RelationServiceGetFolloweeListArgs)
+	realResult := result.(*relation.RelationServiceGetFolloweeListResult)
+	success, err := handler.(relation.RelationService).GetFolloweeList(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newRelationServiceGetFolloweeListArgs() interface{} {
+	return relation.NewRelationServiceGetFolloweeListArgs()
+}
+
+func newRelationServiceGetFolloweeListResult() interface{} {
+	return relation.NewRelationServiceGetFolloweeListResult()
+}
+
+func getFollowerListHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*relation.RelationServiceGetFollowerListArgs)
+	realResult := result.(*relation.RelationServiceGetFollowerListResult)
+	success, err := handler.(relation.RelationService).GetFollowerList(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newRelationServiceGetFollowerListArgs() interface{} {
+	return relation.NewRelationServiceGetFollowerListArgs()
+}
+
+func newRelationServiceGetFollowerListResult() interface{} {
+	return relation.NewRelationServiceGetFollowerListResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -154,6 +254,46 @@ func (p *kClient) Unfollow(ctx context.Context, req *relation.UnfollowRequest) (
 	_args.Req = req
 	var _result relation.RelationServiceUnfollowResult
 	if err = p.c.Call(ctx, "Unfollow", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) CountFolloweeList(ctx context.Context, req *relation.CountFolloweeListRequest) (r *relation.CountFolloweeListResponse, err error) {
+	var _args relation.RelationServiceCountFolloweeListArgs
+	_args.Req = req
+	var _result relation.RelationServiceCountFolloweeListResult
+	if err = p.c.Call(ctx, "CountFolloweeList", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) CountFollowerList(ctx context.Context, req *relation.CountFollowerListRequest) (r *relation.CountFollowerListResponse, err error) {
+	var _args relation.RelationServiceCountFollowerListArgs
+	_args.Req = req
+	var _result relation.RelationServiceCountFollowerListResult
+	if err = p.c.Call(ctx, "CountFollowerList", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetFolloweeList(ctx context.Context, req *relation.GetFolloweeListRequest) (r *relation.GetFolloweeListResponse, err error) {
+	var _args relation.RelationServiceGetFolloweeListArgs
+	_args.Req = req
+	var _result relation.RelationServiceGetFolloweeListResult
+	if err = p.c.Call(ctx, "GetFolloweeList", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetFollowerList(ctx context.Context, req *relation.GetFollowerListRequest) (r *relation.GetFollowerListResponse, err error) {
+	var _args relation.RelationServiceGetFollowerListArgs
+	_args.Req = req
+	var _result relation.RelationServiceGetFollowerListResult
+	if err = p.c.Call(ctx, "GetFollowerList", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

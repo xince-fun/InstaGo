@@ -22,6 +22,7 @@ type Client interface {
 	UploadAvatar(ctx context.Context, req *user.UploadAvatarRequest, callOptions ...callopt.Option) (r *user.UploadAvatarResponse, err error)
 	UpdateAvatarInfo(ctx context.Context, req *user.UpdateAvatarInfoRequest, callOptions ...callopt.Option) (r *user.UpdateAvatarInfoResponse, err error)
 	GetAvatar(ctx context.Context, req *user.GetAvatarRequest, callOptions ...callopt.Option) (r *user.GetAvatarResponse, err error)
+	GetUserInfo(ctx context.Context, req *user.GetUserInfoRequest, callOptions ...callopt.Option) (r *user.GetUserInfoResponse, err error)
 	CheckUserExist(ctx context.Context, req *user.CheckUserExistRequest, callOptions ...callopt.Option) (r *user.CheckUserExistResponse, err error)
 }
 
@@ -107,6 +108,11 @@ func (p *kUserServiceClient) UpdateAvatarInfo(ctx context.Context, req *user.Upd
 func (p *kUserServiceClient) GetAvatar(ctx context.Context, req *user.GetAvatarRequest, callOptions ...callopt.Option) (r *user.GetAvatarResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.GetAvatar(ctx, req)
+}
+
+func (p *kUserServiceClient) GetUserInfo(ctx context.Context, req *user.GetUserInfoRequest, callOptions ...callopt.Option) (r *user.GetUserInfoResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetUserInfo(ctx, req)
 }
 
 func (p *kUserServiceClient) CheckUserExist(ctx context.Context, req *user.CheckUserExistRequest, callOptions ...callopt.Option) (r *user.CheckUserExistResponse, err error) {

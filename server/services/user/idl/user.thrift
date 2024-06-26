@@ -1,6 +1,7 @@
 namespace go user
 
 include "./../../../shared/idl/base/base.thrift"
+include "./../../../shared/idl/common/user.thrift"
 
 struct RegisterPhoneRequest {
     1: string phoneNumber,
@@ -106,6 +107,15 @@ struct GetAvatarResponse {
     2: string avatar_url,
 }
 
+struct GetUserInfoRequest {
+    1: string user_id,
+}
+
+struct GetUserInfoResponse {
+    1: base.BaseResponse base_resp,
+    2: user.UserInfo user_info,
+}
+
 struct CheckUserExistRequest {
     1: string user_id,
 }
@@ -127,6 +137,7 @@ service UserService {
     UploadAvatarResponse UploadAvatar(1: UploadAvatarRequest req)
     UpdateAvatarInfoResponse UpdateAvatarInfo(1: UpdateAvatarInfoRequest req)
     GetAvatarResponse GetAvatar(1: GetAvatarRequest req)
+    GetUserInfoResponse GetUserInfo(1: GetUserInfoRequest req)
 
     CheckUserExistResponse CheckUserExist(1: CheckUserExistRequest req)
 }

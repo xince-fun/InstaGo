@@ -89,3 +89,21 @@ func (r *RelationRepo) DeleteRelation(ctx context.Context, relation *entity.Rela
 
 	return nil
 }
+
+func (r *RelationRepo) CountFollowee(ctx context.Context, followerID string) (int64, error) {
+	return r.relationDal.CountFollowee(ctx, followerID, nil)
+}
+
+func (r *RelationRepo) CountFollower(ctx context.Context, followeeID string) (int64, error) {
+	return r.relationDal.CountFollower(ctx, followeeID, nil)
+}
+
+func (r *RelationRepo) GetFolloweeList(ctx context.Context, followerId string, offset int, size int) ([]*entity.Relation, error) {
+	relationPos, err := r.relationDal.SelectFolloweeList(ctx, followerId, offset, size, nil)
+	return converter.RelationToEntityList(relationPos), err
+}
+
+func (r *RelationRepo) GetFollowerList(ctx context.Context, followeeId string, offset int, size int) ([]*entity.Relation, error) {
+	relationPos, err := r.relationDal.SelectFollowerList(ctx, followeeId, offset, size, nil)
+	return converter.RelationToEntityList(relationPos), err
+}
