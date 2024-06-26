@@ -8,6 +8,7 @@ import (
 )
 
 type Blob struct {
+	ID         int64
 	BlobID     string
 	UserID     string
 	ObjectName string

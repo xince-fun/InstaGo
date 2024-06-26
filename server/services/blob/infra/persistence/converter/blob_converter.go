@@ -7,6 +7,7 @@ import (
 
 func BlobToPo(blob *entity.Blob) *po.Blob {
 	return &po.Blob{
+		ID:         blob.ID,
 		BlobID:     blob.BlobID,
 		UserID:     blob.UserID,
 		ObjectName: blob.ObjectName,
@@ -16,6 +17,7 @@ func BlobToPo(blob *entity.Blob) *po.Blob {
 
 func BlobToEntity(blob *po.Blob) *entity.Blob {
 	return &entity.Blob{
+		ID:         blob.ID,
 		BlobID:     blob.BlobID,
 		UserID:     blob.UserID,
 		ObjectName: blob.ObjectName,
