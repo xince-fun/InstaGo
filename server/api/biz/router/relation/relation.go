@@ -24,6 +24,7 @@ func Register(r *server.Hertz) {
 			{
 				_relation := _v1.Group("/relation", _relationMw()...)
 				_relation.POST("/follow", append(_followMw(), relation.Follow)...)
+				_relation.GET("/is_follow", append(_isfollowMw(), relation.IsFollow)...)
 				_relation.POST("/unfollow", append(_unfollowMw(), relation.Unfollow)...)
 				{
 					_followee := _relation.Group("/followee", _followeeMw()...)

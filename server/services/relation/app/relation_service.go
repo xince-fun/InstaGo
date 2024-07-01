@@ -10,12 +10,14 @@ import (
 	"github.com/xince-fun/InstaGo/server/services/relation/domain/repo"
 	"github.com/xince-fun/InstaGo/server/services/relation/infra/cache"
 	"github.com/xince-fun/InstaGo/server/services/relation/infra/sal"
+	scache "github.com/xince-fun/InstaGo/server/shared/cache"
 	"github.com/xince-fun/InstaGo/server/shared/consts"
 	"github.com/xince-fun/InstaGo/server/shared/errno"
 	"github.com/xince-fun/InstaGo/server/shared/kitex_gen/common"
 	"github.com/xince-fun/InstaGo/server/shared/kitex_gen/relation"
 	"github.com/xince-fun/InstaGo/server/shared/kitex_gen/user"
 	"github.com/xince-fun/InstaGo/server/shared/utils"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -25,14 +27,14 @@ var RelationApplicationSet = wire.NewSet(
 	cache.CacheManagerSet,
 	sal.UserManagerSet,
 	NewRelationApplicationService,
-	wire.Bind(new(CacheManager), new(*cache.RedisManager)),
+	wire.Bind(new(scache.CacheManager), new(*cache.CacheManager)),
 	wire.Bind(new(UserManager), new(*sal.UserManager)),
 )
 
 type RelationApplicationService struct {
 	relationRepo repo.RelationRepo
 	userManager  UserManager
-	cacheManager CacheManager
+	cacheManager scache.CacheManager
 }
 
 type UserManager interface {
@@ -40,13 +42,8 @@ type UserManager interface {
 	GetUserInfo(context.Context, *user.GetUserInfoRequest) (*user.GetUserInfoResponse, error)
 }
 
-type CacheManager interface {
-	Get(context.Context, string, interface{}) error
-	Set(context.Context, string, cache.CacheItem) error
-}
-
 func NewRelationApplicationService(relationRepo repo.RelationRepo, userManager UserManager,
-	cacheManager CacheManager) *RelationApplicationService {
+	cacheManager scache.CacheManager) *RelationApplicationService {
 	return &RelationApplicationService{
 		userManager:  userManager,
 		relationRepo: relationRepo,
@@ -99,6 +96,26 @@ func (s *RelationApplicationService) Follow(ctx context.Context, req *relation.F
 		return resp, nil
 	} else if err != nil {
 		resp.BaseResp = utils.BuildBaseResp(errno.RelationDBError)
+		return resp, nil
+	}
+
+	if err = s.updateFolloweeListCache(ctx, req.FollowerId, r, true); err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.RelationCacheError)
+		return resp, nil
+	}
+
+	if err = s.updateFollowerListCache(ctx, req.FolloweeId, r, true); err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.RelationCacheError)
+		return resp, nil
+	}
+
+	if err = s.updateFolloweeCountCache(ctx, req.FollowerId, true); err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.RelationCacheError)
+		return resp, nil
+	}
+
+	if err = s.updateFollowerCountCache(ctx, req.FolloweeId, true); err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.RelationCacheError)
 		return resp, nil
 	}
 
@@ -173,9 +190,13 @@ func (s *RelationApplicationService) CountFolloweeList(ctx context.Context, req 
 		return resp, nil
 	}
 
-	value := cache.RelationItem{}
-	if err = s.cacheManager.Get(ctx, fmt.Sprintf(consts.FolloweeCountCacheKey, req.UserId), &value); err == nil && value.IsDirty() {
-		resp.Count = value.Count
+	if countString, err := s.cacheManager.Get(ctx, fmt.Sprintf(consts.FolloweeCountCacheKey, req.UserId)); err == nil && countString != "" {
+		count, err := strconv.ParseUint(countString, 10, 32)
+		if err != nil {
+			resp.BaseResp = utils.BuildBaseResp(errno.RelationCacheError)
+			return resp, nil
+		}
+		resp.Count = int32(count)
 		return resp, nil
 	} else {
 		count, err := s.relationRepo.CountFollowee(ctx, req.UserId)
@@ -185,7 +206,8 @@ func (s *RelationApplicationService) CountFolloweeList(ctx context.Context, req 
 		}
 		resp.Count = int32(count)
 		go func() {
-			if err := s.cacheManager.Set(ctx, fmt.Sprintf(consts.FolloweeCountCacheKey, req.UserId), &cache.RelationItem{Count: int32(count)}); err != nil {
+			countString = strconv.FormatUint(uint64(count), 10)
+			if err := s.cacheManager.Set(ctx, fmt.Sprintf(consts.FolloweeCountCacheKey, req.UserId), countString); err != nil {
 				klog.Infof("set followee count cache failed, err: %v", err)
 			}
 		}()
@@ -208,9 +230,13 @@ func (s *RelationApplicationService) CountFollowerList(ctx context.Context, req 
 		return resp, nil
 	}
 
-	value := cache.RelationItem{}
-	if err = s.cacheManager.Get(ctx, fmt.Sprintf(consts.FollowerCountCacheKey, req.UserId), &value); err == nil && value.IsDirty() {
-		resp.Count = value.Count
+	if countString, err := s.cacheManager.Get(ctx, fmt.Sprintf(consts.FollowerCountCacheKey, req.UserId)); err == nil && countString != "" {
+		count, err := strconv.ParseUint(countString, 10, 32)
+		if err != nil {
+			resp.BaseResp = utils.BuildBaseResp(errno.RelationCacheError)
+			return resp, nil
+		}
+		resp.Count = int32(count)
 		return resp, nil
 	} else {
 		count, err := s.relationRepo.CountFollower(ctx, req.UserId)
@@ -220,7 +246,8 @@ func (s *RelationApplicationService) CountFollowerList(ctx context.Context, req 
 		}
 		resp.Count = int32(count)
 		go func() {
-			if err := s.cacheManager.Set(ctx, fmt.Sprintf(consts.FollowerCountCacheKey, req.UserId), &cache.RelationItem{Count: int32(count)}); err != nil {
+			countString = strconv.FormatUint(uint64(count), 10)
+			if err := s.cacheManager.Set(ctx, fmt.Sprintf(consts.FollowerCountCacheKey, req.UserId), countString); err != nil {
 				klog.Infof("set follower count cache failed, err: %v", err)
 			}
 		}()
@@ -243,29 +270,27 @@ func (s *RelationApplicationService) GetFolloweeList(ctx context.Context, req *r
 		return resp, nil
 	}
 
-	var followeeIdList []string
-	idList := cache.IDList{}
-	if err = s.cacheManager.Get(ctx, fmt.Sprintf(consts.FolloweeListCacheKey, req.UserId), &idList); err == nil && idList.IsDirty() {
-		for _, id := range idList {
-			followeeIdList = append(followeeIdList, id)
-		}
-	} else {
+	cacheKey := fmt.Sprintf(consts.FolloweeListCacheKey, req.UserId)
+	idList, err := s.cacheManager.Client().SMembers(ctx, cacheKey).Result()
+
+	followeeIdList := make([]string, len(idList))
+
+	if len(idList) == 0 || err != nil {
 		rList, err := s.relationRepo.GetFolloweeList(ctx, req.UserId, int(req.Offset), int(req.Limit))
 		if err != nil {
 			resp.BaseResp = utils.BuildBaseResp(errno.RelationDBError)
 			return resp, nil
 		}
 
-		c := cache.IDList{}
-		for _, r := range rList {
-			followeeIdList = append(followeeIdList, r.FolloweeID)
-			c = append(c, r.FolloweeID)
+		followeeIdList = make([]string, len(rList))
+		for i, r := range rList {
+			followeeIdList[i] = r.FolloweeID
+			s.cacheManager.Client().SAdd(ctx, cacheKey, r.FolloweeID)
 		}
-		go func() {
-			if err := s.cacheManager.Set(ctx, fmt.Sprintf(consts.FolloweeListCacheKey, req.UserId), &c); err != nil {
-				klog.Infof("set followee list cache failed, err: %v", err)
-			}
-		}()
+	} else {
+		for i, id := range idList {
+			followeeIdList[i] = id
+		}
 	}
 	followeeList, err := s.idListToUserList(ctx, followeeIdList)
 	if err != nil {
@@ -293,29 +318,26 @@ func (s *RelationApplicationService) GetFollowerList(ctx context.Context, req *r
 		return resp, nil
 	}
 
-	var followerIdList []string
-	idList := cache.IDList{}
-	if err = s.cacheManager.Get(ctx, fmt.Sprintf(consts.FollowerListCacheKey, req.UserId), &idList); err == nil && idList.IsDirty() {
-		for _, id := range idList {
-			followerIdList = append(followerIdList, id)
-		}
-	} else {
+	cacheKey := fmt.Sprintf(consts.FollowerListCacheKey, req.UserId)
+	idList, err := s.cacheManager.Client().SMembers(ctx, cacheKey).Result()
+	followerIdList := make([]string, len(idList))
+
+	if len(idList) == 0 || err != nil {
 		rList, err := s.relationRepo.GetFollowerList(ctx, req.UserId, int(req.Offset), int(req.Limit))
 		if err != nil {
 			resp.BaseResp = utils.BuildBaseResp(errno.RelationDBError)
 			return resp, nil
 		}
 
-		c := cache.IDList{}
-		for _, r := range rList {
-			followerIdList = append(followerIdList, r.FollowerID)
-			c = append(c, r.FollowerID)
+		followerIdList = make([]string, len(rList))
+		for i, r := range rList {
+			followerIdList[i] = r.FollowerID
+			s.cacheManager.Client().SAdd(ctx, cacheKey, r.FollowerID)
 		}
-		go func() {
-			if err := s.cacheManager.Set(ctx, fmt.Sprintf(consts.FollowerListCacheKey, req.UserId), &c); err == nil && idList.IsDirty() {
-				klog.Infof("set follower list cache failed, err: %v", err)
-			}
-		}()
+	} else {
+		for i, id := range idList {
+			followerIdList[i] = id
+		}
 	}
 
 	followerList, err := s.idListToUserList(ctx, followerIdList)
@@ -327,6 +349,32 @@ func (s *RelationApplicationService) GetFollowerList(ctx context.Context, req *r
 	resp.FollowerList = followerList
 	resp.BaseResp = utils.BuildBaseResp(nil)
 	return resp, nil
+}
+
+func (s *RelationApplicationService) IsFollow(ctx context.Context, req *relation.IsFollowRequest) (resp *relation.IsFollowResponse, err error) {
+	resp = new(relation.IsFollowResponse)
+
+	cacheKey := fmt.Sprintf(consts.IsFollowCacheKey, req.FollowerId, req.FolloweeId)
+	if isFollow, err := s.cacheManager.Get(ctx, cacheKey); err == nil && isFollow != "" {
+		resp.IsFollow = isFollow == "true"
+		return resp, nil
+	} else {
+		res, err := s.relationRepo.IsFollow(ctx, req.FollowerId, req.FolloweeId)
+		if err != nil {
+			resp.BaseResp = utils.BuildBaseResp(errno.RelationDBError)
+			return resp, nil
+		}
+		resp.IsFollow = res
+		resp.BaseResp = utils.BuildBaseResp(nil)
+
+		// write back to cache
+		go func() {
+			if err := s.cacheManager.Set(ctx, cacheKey, strconv.FormatBool(res)); err != nil {
+				klog.Infof("write back to cache error: %v", err)
+			}
+		}()
+		return resp, nil
+	}
 }
 
 func (s *RelationApplicationService) idListToUserList(ctx context.Context, idList []string) ([]*common.UserInfo, error) {
@@ -373,4 +421,134 @@ func (s *RelationApplicationService) idListToUserList(ctx context.Context, idLis
 	wg.Wait()
 
 	return userList, nil
+}
+
+func (s *RelationApplicationService) updateFolloweeListCache(ctx context.Context, userId string, relation entity.Relation, op bool) error {
+	cacheKey := fmt.Sprintf(consts.FolloweeListCacheKey, userId)
+	if op {
+		if err := s.cacheManager.Client().SAdd(ctx, cacheKey, relation.FolloweeID).Err(); err != nil {
+			klog.Errorf("add followee list cache failed, err: %v", err)
+			return err
+		}
+	} else {
+		if err := s.cacheManager.Client().SRem(ctx, cacheKey, relation.FolloweeID).Err(); err != nil {
+			klog.Errorf("remove followee list cache failed, err: %v", err)
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *RelationApplicationService) updateFollowerListCache(ctx context.Context, userId string, relation entity.Relation, op bool) error {
+	cacheKey := fmt.Sprintf(consts.FollowerListCacheKey, userId)
+	if op {
+		if err := s.cacheManager.Client().SAdd(ctx, cacheKey, relation.FollowerID).Err(); err != nil {
+			klog.Errorf("add follower list cache failed, err: %v", err)
+			return err
+		}
+	} else {
+		if err := s.cacheManager.Client().SRem(ctx, cacheKey, relation.FollowerID).Err(); err != nil {
+			klog.Errorf("remove follower list cache failed, err: %v", err)
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *RelationApplicationService) updateFolloweeCountCache(ctx context.Context, userId string, op bool) error {
+	cacheKey := fmt.Sprintf(consts.FolloweeCountCacheKey, userId)
+	var count uint32
+
+	oriCountString, err := s.cacheManager.Get(ctx, cacheKey)
+	if err != nil {
+		if !(errors.Is(err, cache.ErrCacheNotFound) || errors.Is(err, cache.ErrCacheNotFound)) {
+			return err
+		}
+	}
+	// not hit
+	if errors.Is(err, cache.ErrCacheNotFound) {
+		oriCount, err := s.relationRepo.CountFollowee(ctx, userId)
+		if err != nil {
+			return err
+		}
+		if op {
+			oriCount = oriCount + 1
+		} else {
+			if oriCount == 0 {
+				oriCount = 0
+			} else {
+				oriCount = oriCount - 1
+			}
+		}
+
+		count = uint32(oriCount)
+	} else {
+		oriCount, err := strconv.ParseUint(oriCountString, 10, 32)
+		if err != nil {
+			return err
+		}
+		oriCountInt := uint32(oriCount)
+		if op {
+			count = oriCountInt + 1
+		} else {
+			if oriCountInt == 0 {
+				count = 0
+			} else {
+				count = oriCountInt - 1
+			}
+		}
+	}
+
+	// write back
+	countString := strconv.FormatUint(uint64(count), 10)
+	return s.cacheManager.Set(ctx, cacheKey, countString)
+}
+
+func (s *RelationApplicationService) updateFollowerCountCache(ctx context.Context, userId string, op bool) error {
+	cacheKey := fmt.Sprintf(consts.FollowerListCacheKey, userId)
+	var count uint32
+
+	oriCountString, err := s.cacheManager.Get(ctx, cacheKey)
+	if err != nil {
+		if !(errors.Is(err, cache.ErrCacheNotFound) || errors.Is(err, cache.ErrCacheNotFound)) {
+			return err
+		}
+	}
+	// not hit
+	if errors.Is(err, cache.ErrCacheNotFound) {
+		oriCount, err := s.relationRepo.CountFollower(ctx, userId)
+		if err != nil {
+			return err
+		}
+		if op {
+			oriCount = oriCount + 1
+		} else {
+			if oriCount == 0 {
+				oriCount = 0
+			} else {
+				oriCount = oriCount - 1
+			}
+		}
+
+		count = uint32(oriCount)
+	} else {
+		oriCount, err := strconv.ParseUint(oriCountString, 10, 32)
+		if err != nil {
+			return err
+		}
+		oriCountInt := uint32(oriCount)
+		if op {
+			count = oriCountInt + 1
+		} else {
+			if oriCountInt == 0 {
+				count = 0
+			} else {
+				count = oriCountInt - 1
+			}
+		}
+	}
+
+	// write back
+	countString := strconv.FormatUint(uint64(count), 10)
+	return s.cacheManager.Set(ctx, cacheKey, countString)
 }

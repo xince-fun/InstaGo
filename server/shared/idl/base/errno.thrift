@@ -16,6 +16,10 @@ enum Err {
     RelationSelfErr = 50002,
     RelationExistErr = 50003,
     RelationNotExistErr = 50004,
+    RelationCacheErr = 50005,
+
+    InvalidPhoto = 60004,
+    InvalidVideo = 60005,
     RecordNotFound = 80000,
     RecordExist = 80001,
     InvalidDate = 90001,

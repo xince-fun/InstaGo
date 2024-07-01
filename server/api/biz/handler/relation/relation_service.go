@@ -170,3 +170,30 @@ func CountFollowerList(ctx context.Context, c *app.RequestContext) {
 
 	c.JSON(http.StatusOK, resp)
 }
+
+// IsFollow .
+// @router /api/v1/relation/is_follow [GET]
+func IsFollow(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req relation.IsFollowRequest
+
+	resp := new(krelation.IsFollowResponse)
+	if err = c.BindAndValidate(&req); err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.ParamsErr)
+		c.JSON(http.StatusBadRequest, resp)
+		return
+	}
+
+	resp, err = rpc.IsFollow(ctx, &krelation.IsFollowRequest{
+		FollowerId: c.MustGet(consts.UserID).(string),
+		FolloweeId: req.FolloweeID,
+	})
+
+	if err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.ServiceErr)
+		c.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}

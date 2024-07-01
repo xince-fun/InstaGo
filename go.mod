@@ -40,6 +40,7 @@ require (
 	cloud.google.com/go/auth/oauth2adapt v0.2.2 // indirect
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	cloud.google.com/go/iam v1.1.8 // indirect
+	github.com/allegro/bigcache v1.2.1 // indirect
 	github.com/armon/go-metrics v0.4.1 // indirect
 	github.com/bytedance/go-tagexpr/v2 v2.9.2 // indirect
 	github.com/bytedance/gopkg v0.0.0-20240514070511-01b2cbcf35e1 // indirect
@@ -56,6 +57,7 @@ require (
 	github.com/cloudwego/netpoll v0.6.1 // indirect
 	github.com/cloudwego/runtimex v0.1.0 // indirect
 	github.com/cloudwego/thriftgo v0.3.6 // indirect
+	github.com/coocood/freecache v1.2.4 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -108,6 +110,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/nyaruka/phonenumbers v1.0.55 // indirect
 	github.com/oleiade/lane v1.0.1 // indirect
+	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/redis/go-redis/v9 v9.5.3 // indirect

@@ -19,6 +19,12 @@ const (
 	ConsulCheckTimeout                        = "5s"
 	ConsulCheckDeregisterCriticalServiceAfter = "15s"
 
+	DetectorBufferSize = 512
+
+	PNGContentType  = "image/png"
+	JPEGContentType = "image/jpeg"
+	MP4ContentType  = "video/mp4"
+
 	IPFlagName    = "ip"
 	IPFlagValue   = "0.0.0.0"
 	IPFlagUsage   = "address"
@@ -43,6 +49,7 @@ const (
 	FollowerCountCacheKey = "follower_count_%s"
 	FolloweeListCacheKey  = "followee_list_%s"
 	FollowerListCacheKey  = "follower_list_%s"
+	IsFollowCacheKey      = "is_follow_%s_%s"
 )
 
 const (
@@ -53,4 +60,6 @@ const (
 
 const (
 	AvatarBlobType = iota + 1
+	PhotoBlobType
+	VideoBlobType
 )

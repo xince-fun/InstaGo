@@ -48,8 +48,12 @@ var (
 	RelationSelfError     = NewErrNo(int64(errno.Err_RelationSelfErr), "can't follow self")
 	RelationExistError    = NewErrNo(int64(errno.Err_RelationExistErr), "already followed")
 	RelationNotExistError = NewErrNo(int64(errno.Err_RelationNotExistErr), "follow not exist")
-	RecordNotFound        = NewErrNo(int64(errno.Err_RecordNotFound), "record not found")
-	RecordExist           = NewErrNo(int64(errno.Err_RecordExist), "record exist")
+	RelationCacheError    = NewErrNo(int64(errno.Err_RelationCacheErr), "follow cache error")
+
+	InvalidPhotoError = NewErrNo(int64(errno.Err_InvalidPhoto), "invalid photo")
+	InvalidVideoError = NewErrNo(int64(errno.Err_InvalidVideo), "invalid video")
+	RecordNotFound    = NewErrNo(int64(errno.Err_RecordNotFound), "record not found")
+	RecordExist       = NewErrNo(int64(errno.Err_RecordExist), "record exist")
 )
 
 var (

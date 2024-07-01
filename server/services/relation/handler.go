@@ -52,3 +52,8 @@ func (s *RelationServiceImpl) GetFolloweeList(ctx context.Context, req *relation
 func (s *RelationServiceImpl) GetFollowerList(ctx context.Context, req *relation.GetFollowerListRequest) (resp *relation.GetFollowerListResponse, err error) {
 	return s.app.GetFollowerList(ctx, req)
 }
+
+// IsFollow implements the RelationServiceImpl interface.
+func (s *RelationServiceImpl) IsFollow(ctx context.Context, req *relation.IsFollowRequest) (resp *relation.IsFollowResponse, err error) {
+	return s.app.IsFollow(ctx, req)
+}

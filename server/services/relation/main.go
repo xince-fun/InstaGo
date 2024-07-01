@@ -28,7 +28,8 @@ func main() {
 		provider.WithInsecure(),
 	)
 	defer p.Shutdown(context.Background())
-	svr := relation.NewServer(InitializeService(),
+	impl, _ := InitializeService()
+	svr := relation.NewServer(impl,
 		server.WithServiceAddr(utils.NewNetAddr(consts.TCP, net.JoinHostPort(IP, strconv.Itoa(Port)))),
 		server.WithRegistry(r),
 		server.WithRegistryInfo(info),

@@ -22,6 +22,8 @@ type RelationRepo interface {
 
 	CountFollowee(context.Context, string) (int64, error)
 	CountFollower(context.Context, string) (int64, error)
+
+	IsFollow(context.Context, string, string) (bool, error)
 }
 
 var RelationRepositorySet = wire.NewSet(

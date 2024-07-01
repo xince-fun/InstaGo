@@ -107,3 +107,8 @@ func (r *RelationRepo) GetFollowerList(ctx context.Context, followeeId string, o
 	relationPos, err := r.relationDal.SelectFollowerList(ctx, followeeId, offset, size, nil)
 	return converter.RelationToEntityList(relationPos), err
 }
+
+func (r *RelationRepo) IsFollow(ctx context.Context, followerId, followeeId string) (bool, error) {
+	count, err := r.relationDal.CountRelation(ctx, followerId, followeeId, nil)
+	return count == 1, err
+}

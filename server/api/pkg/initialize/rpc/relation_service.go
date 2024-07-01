@@ -103,3 +103,12 @@ func GetFollowerList(ctx context.Context, req *krelation.GetFollowerListRequest)
 	}
 	return resp, nil
 }
+
+func IsFollow(ctx context.Context, req *krelation.IsFollowRequest) (resp *krelation.IsFollowResponse, err error) {
+	resp, err = relationClient.IsFollow(ctx, req)
+	if err != nil {
+		resp.BaseResp = utils.BuildBaseResp(errno.ServiceErr)
+		return resp, err
+	}
+	return resp, nil
+}

@@ -13,19 +13,25 @@ import (
 	"github.com/xince-fun/InstaGo/server/services/relation/infra/persistence/dal"
 	"github.com/xince-fun/InstaGo/server/services/relation/infra/sal"
 	"github.com/xince-fun/InstaGo/server/services/relation/pkg/initialize"
+	cache2 "github.com/xince-fun/InstaGo/server/shared/cache"
 )
 
 // Injectors from wire.go:
 
-func InitializeService() *RelationServiceImpl {
+func InitializeService() (*RelationServiceImpl, error) {
 	db := initialize.InitDB()
 	relationDal := dal.NewRelationDal(db)
 	relationRepo := persistence.NewRelationRepo(relationDal)
 	client := initialize.InitUser()
 	userManager := sal.NewUserManager(client)
-	cacheCache := cache.NewCache()
-	redisManager := cache.NewRedisManager(cacheCache)
-	relationApplicationService := app.NewRelationApplicationService(relationRepo, userManager, redisManager)
+	localCacheConfig := cache.ProvideLocalCache()
+	localCache, err := cache2.NewLocalCache(localCacheConfig)
+	if err != nil {
+		return nil, err
+	}
+	universalClient := cache.NewClient()
+	cacheManager := cache.NewCacheManager(localCache, universalClient)
+	relationApplicationService := app.NewRelationApplicationService(relationRepo, userManager, cacheManager)
 	relationServiceImpl := NewRelationServiceImpl(relationApplicationService)
-	return relationServiceImpl
+	return relationServiceImpl, nil
 }

@@ -61,6 +61,16 @@ struct GetFollowerListResponse {
     2: list<user.UserInfo> follower_list
 }
 
+struct IsFollowRequest {
+    1: string follower_id
+    2: string followee_id
+}
+
+struct IsFollowResponse {
+    1: base.BaseResponse base_resp,
+    2: bool is_follow
+}
+
 service RelationService {
     FollowResponse Follow(1: FollowRequest req)
     UnfollowResponse Unfollow(1: UnfollowRequest req)
@@ -68,4 +78,6 @@ service RelationService {
     CountFollowerListResponse CountFollowerList(1: CountFollowerListRequest req)
     GetFolloweeListResponse GetFolloweeList(1: GetFolloweeListRequest req)
     GetFollowerListResponse GetFollowerList(1: GetFollowerListRequest req)
+
+    IsFollowResponse IsFollow(1: IsFollowRequest req)
 }

@@ -26,6 +26,11 @@ struct GetFollowersRequest {
     2: i32 limit (api.query = "limit")
 }
 
+struct IsFollowRequest {
+    1: string followerID (api.query = "follower_id")
+    2: string followeeID (api.query = "followee_id")
+}
+
 service RelationService {
     base.NilResponse Follow(1: FollowRequest req) (api.post = "/api/v1/relation/follow")
     base.NilResponse Unfollow(1: UnfollowRequest req) (api.post = "/api/v1/relation/unfollow")
@@ -33,4 +38,6 @@ service RelationService {
     base.NilResponse CountFollowerList(1: CountFollowersRequest req) (api.get = "/api/v1/relation/follower/count")
     base.NilResponse GetFolloweeList(1: GetFolloweesRequest req) (api.get = "/api/v1/relation/followee/list")
     base.NilResponse GetFollowerList(1: GetFollowersRequest req) (api.get = "/api/v1/relation/follower/list")
+
+    base.NilResponse IsFollow(1: IsFollowRequest req) (api.get = "/api/v1/relation/is_follow")
 }

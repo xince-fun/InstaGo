@@ -43,7 +43,10 @@ type RPCSrvConfig struct {
 
 type RedisConfig struct {
 	RedisServerConfig []RedisServerConfig `mapstructure:"server" json:"server"`
-	LocalCacheTime    int                 `mapstructure:"local_cache" json:"local_cache"`
+	CacheEngine       string              `mapstructure:"cache_engine" json:"cache_engine"`
+	ExpireTime        int                 `mapstructure:"expire_time" json:"expire_time"`
+	ClearTime         int                 `mapstructure:"clear_time" json:"clear_time"`
+	MaxSizeMB         int                 `mapstructure:"max_size_mb" json:"max_size_mb"`
 }
 
 type RedisServerConfig struct {

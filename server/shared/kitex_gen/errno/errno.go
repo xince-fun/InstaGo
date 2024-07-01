@@ -26,6 +26,9 @@ const (
 	Err_RelationSelfErr     Err = 50002
 	Err_RelationExistErr    Err = 50003
 	Err_RelationNotExistErr Err = 50004
+	Err_RelationCacheErr    Err = 50005
+	Err_InvalidPhoto        Err = 60004
+	Err_InvalidVideo        Err = 60005
 	Err_RecordNotFound      Err = 80000
 	Err_RecordExist         Err = 80001
 	Err_InvalidDate         Err = 90001
@@ -63,6 +66,12 @@ func (p Err) String() string {
 		return "RelationExistErr"
 	case Err_RelationNotExistErr:
 		return "RelationNotExistErr"
+	case Err_RelationCacheErr:
+		return "RelationCacheErr"
+	case Err_InvalidPhoto:
+		return "InvalidPhoto"
+	case Err_InvalidVideo:
+		return "InvalidVideo"
 	case Err_RecordNotFound:
 		return "RecordNotFound"
 	case Err_RecordExist:
@@ -105,6 +114,12 @@ func ErrFromString(s string) (Err, error) {
 		return Err_RelationExistErr, nil
 	case "RelationNotExistErr":
 		return Err_RelationNotExistErr, nil
+	case "RelationCacheErr":
+		return Err_RelationCacheErr, nil
+	case "InvalidPhoto":
+		return Err_InvalidPhoto, nil
+	case "InvalidVideo":
+		return Err_InvalidVideo, nil
 	case "RecordNotFound":
 		return Err_RecordNotFound, nil
 	case "RecordExist":

@@ -97,3 +97,8 @@ func _countfollowerlistMw() []app.HandlerFunc {
 	// your code...
 	return nil
 }
+
+func _isfollowMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}

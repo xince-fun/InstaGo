@@ -13,7 +13,12 @@ blob:
 relation:
 	make service=relation generate
 
+post:
+	make service=post generate
+
 all:
 	make user
 	make blob
 	make follow
+	make relation
+	make post
