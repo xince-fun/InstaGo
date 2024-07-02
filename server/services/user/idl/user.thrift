@@ -90,8 +90,6 @@ struct UploadAvatarResponse {
 struct UpdateAvatarInfoRequest {
     1: string user_id,
     2: string avatar_id,
-    3: string object_name,
-    4: i8 blob_type,
 }
 
 struct UpdateAvatarInfoResponse {

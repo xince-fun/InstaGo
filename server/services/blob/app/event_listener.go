@@ -10,27 +10,38 @@ import (
 	"github.com/xince-fun/InstaGo/server/services/blob/domain/repo"
 	"github.com/xince-fun/InstaGo/server/services/blob/infra/cache"
 	"github.com/xince-fun/InstaGo/server/services/blob/infra/mq/amqp"
+	"github.com/xince-fun/InstaGo/server/services/blob/infra/sal"
 	"github.com/xince-fun/InstaGo/server/shared/consts"
+	"github.com/xince-fun/InstaGo/server/shared/kitex_gen/user"
 )
 
 var BlobEventListenerSet = wire.NewSet(
 	amqp.SubscriberSet,
+	sal.UserManagerSet,
 	amqp.NewEventSubscriber,
 	NewBlobEventListener,
 	wire.Bind(new(event.EventSubscriber), new(*amqp.EventSubscriber)),
+	wire.Bind(new(UserManager), new(*sal.UserManager)),
 )
 
 type BlobEventListener struct {
 	blobRepo        repo.BlobRepository
 	eventSubscriber event.EventSubscriber
 	cacheManager    CacheManager
+	userManager     UserManager
 }
 
-func NewBlobEventListener(blobRepo repo.BlobRepository, eventSubscriber event.EventSubscriber, cacheManager CacheManager) *BlobEventListener {
+type UserManager interface {
+	UpdateAvatarInfo(context.Context, *user.UpdateAvatarInfoRequest) (*user.UpdateAvatarInfoResponse, error)
+}
+
+func NewBlobEventListener(blobRepo repo.BlobRepository, eventSubscriber event.EventSubscriber, cacheManager CacheManager,
+	userManager UserManager) *BlobEventListener {
 	return &BlobEventListener{
 		blobRepo:        blobRepo,
 		eventSubscriber: eventSubscriber,
 		cacheManager:    cacheManager,
+		userManager:     userManager,
 	}
 }
 
@@ -86,6 +97,13 @@ func (e *BlobEventListener) processAvatarBlob(ctx context.Context, blob *entity.
 			klog.Infof("copy blob error: %v", err)
 			return err
 		}
+	}
+	_, err = e.userManager.UpdateAvatarInfo(ctx, &user.UpdateAvatarInfoRequest{
+		UserId:   blobR.UserID,
+		AvatarId: blobR.BlobID,
+	})
+	if err != nil {
+		return err
 	}
 	return e.blobRepo.SaveBlob(ctx, blobR)
 }

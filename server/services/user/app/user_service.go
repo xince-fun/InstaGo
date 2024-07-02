@@ -331,6 +331,7 @@ func (s *UserApplicationService) UploadAvatar(ctx context.Context, req *user.Upl
 
 	blobResp, err := s.blobManager.UploadBlob(ctx, &blob.GeneratePutPreSignedUrlRequest{
 		UserId:   req.UserId,
+		Bucket:   consts.AvatarBucket,
 		BlobType: consts.AvatarBlobType,
 		Timeout:  int32(10 * time.Second.Seconds()),
 	})
@@ -352,24 +353,13 @@ func (s *UserApplicationService) UpdateAvatarInfo(ctx context.Context, req *user
 	usrInfo, err := s.userRepo.FindUserInfoByUserIDNonNil(ctx, req.UserId)
 	if err != nil {
 		resp.BaseResp = utils.BuildBaseResp(errno.UserNotExistError)
-		return resp, nil
-	}
-
-	_, err = s.blobManager.NotifyBlobUpload(ctx, &blob.NotifyBlobUploadRequest{
-		BlobId:     req.AvatarId,
-		UserId:     req.UserId,
-		ObjectName: req.ObjectName,
-		BlobType:   req.BlobType,
-	})
-	if err != nil {
-		resp.BaseResp = utils.BuildBaseResp(errno.BlobSrvError)
-		return resp, nil
+		return resp, err
 	}
 
 	usrInfo.SetAvatarID(req.AvatarId)
 	if err = s.userRepo.SaveUserInfo(ctx, usrInfo); err != nil {
 		resp.BaseResp = utils.BuildBaseResp(errno.UserSrvError)
-		return resp, nil
+		return resp, err
 	}
 
 	resp.BaseResp = utils.BuildBaseResp(nil)
@@ -400,6 +390,7 @@ func (s *UserApplicationService) GetAvatar(ctx context.Context, req *user.GetAva
 
 	blobResp, err := s.blobManager.GetBlob(ctx, &blob.GenerateGetPreSignedUrlRequest{
 		BlobId:  avatarId,
+		Bucket:  consts.AvatarBucket,
 		Timeout: int32(60 * time.Second.Seconds()),
 	})
 	if err != nil {

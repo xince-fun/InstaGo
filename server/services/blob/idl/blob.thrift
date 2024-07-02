@@ -4,8 +4,9 @@ include "./../../../shared/idl/base/base.thrift"
 
 struct GeneratePutPreSignedUrlRequest {
     1: string user_id,
-    2: i8 blob_type,
-    3: i32 timeout,
+    2: string bucket,
+    3: i8 blob_type,
+    4: i32 timeout,
 }
 
 struct GeneratePutPreSignedUrlResponse {
@@ -16,7 +17,8 @@ struct GeneratePutPreSignedUrlResponse {
 
 struct GenerateGetPreSignedUrlRequest {
     1: string blob_id,
-    2: i32 timeout,
+    2: string bucket,
+    3: i32 timeout,
 }
 
 struct GenerateGetPreSignedUrlResponse {

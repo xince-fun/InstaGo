@@ -35,11 +35,6 @@ struct UpdateBirthDayRequest {
 
 struct UploadAvatarRequest {}
 
-struct UpdateAvatarInfoRequest {
-    1: string avatar_id (api.body = "avatar_id")
-    2: string object_name (api.body = "object_name")
-    3: i8 blob_type (api.body = "blob_type")
-}
 
 struct GetAvatarRequest {}
 
@@ -51,7 +46,6 @@ service UserService {
     base.NilResponse UpdatePasswd(1: UpdatePasswdRequest req) (api.put = "/api/v1/user/passwd")
     base.NilResponse UpdateBirthDay(1: UpdateBirthDayRequest req) (api.put = "/api/v1/user/birthday")
     base.NilResponse UploadAvatar(1: UploadAvatarRequest req) (api.post = "/api/v1/user/avatar")
-    base.NilResponse UpdateAvatarInfo(1: UpdateAvatarInfoRequest req) (api.put = "/api/v1/user/avatar")
 
     base.NilResponse GetAvatar(1: GetAvatarRequest req) (api.get = "/api/v1/user/avatar")
 }

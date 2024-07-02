@@ -13,6 +13,7 @@ import (
 	"github.com/xince-fun/InstaGo/server/services/blob/infra/object/minio"
 	"github.com/xince-fun/InstaGo/server/services/blob/infra/persistence"
 	"github.com/xince-fun/InstaGo/server/services/blob/infra/persistence/dal"
+	"github.com/xince-fun/InstaGo/server/services/blob/infra/sal"
 	"github.com/xince-fun/InstaGo/server/services/blob/pkg/initialize"
 )
 
@@ -40,7 +41,8 @@ func InitializeService() (*BlobServiceImpl, error) {
 		return nil, err
 	}
 	eventSubscriber := amqp.NewEventSubscriber(subscriber)
-	blobEventListener := app.NewBlobEventListener(blobRepo, eventSubscriber, redisManager)
+	userManager := sal.NewUserManager()
+	blobEventListener := app.NewBlobEventListener(blobRepo, eventSubscriber, redisManager, userManager)
 	blobServiceImpl := NewBlobServiceImpl(blobApplicationService, blobEventListener)
 	return blobServiceImpl, nil
 }

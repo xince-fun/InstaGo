@@ -11,8 +11,9 @@ import (
 
 type GeneratePutPreSignedUrlRequest struct {
 	UserId   string `thrift:"user_id,1" frugal:"1,default,string" json:"user_id"`
-	BlobType int8   `thrift:"blob_type,2" frugal:"2,default,i8" json:"blob_type"`
-	Timeout  int32  `thrift:"timeout,3" frugal:"3,default,i32" json:"timeout"`
+	Bucket   string `thrift:"bucket,2" frugal:"2,default,string" json:"bucket"`
+	BlobType int8   `thrift:"blob_type,3" frugal:"3,default,i8" json:"blob_type"`
+	Timeout  int32  `thrift:"timeout,4" frugal:"4,default,i32" json:"timeout"`
 }
 
 func NewGeneratePutPreSignedUrlRequest() *GeneratePutPreSignedUrlRequest {
@@ -27,6 +28,10 @@ func (p *GeneratePutPreSignedUrlRequest) GetUserId() (v string) {
 	return p.UserId
 }
 
+func (p *GeneratePutPreSignedUrlRequest) GetBucket() (v string) {
+	return p.Bucket
+}
+
 func (p *GeneratePutPreSignedUrlRequest) GetBlobType() (v int8) {
 	return p.BlobType
 }
@@ -37,6 +42,9 @@ func (p *GeneratePutPreSignedUrlRequest) GetTimeout() (v int32) {
 func (p *GeneratePutPreSignedUrlRequest) SetUserId(val string) {
 	p.UserId = val
 }
+func (p *GeneratePutPreSignedUrlRequest) SetBucket(val string) {
+	p.Bucket = val
+}
 func (p *GeneratePutPreSignedUrlRequest) SetBlobType(val int8) {
 	p.BlobType = val
 }
@@ -46,8 +54,9 @@ func (p *GeneratePutPreSignedUrlRequest) SetTimeout(val int32) {
 
 var fieldIDToName_GeneratePutPreSignedUrlRequest = map[int16]string{
 	1: "user_id",
-	2: "blob_type",
-	3: "timeout",
+	2: "bucket",
+	3: "blob_type",
+	4: "timeout",
 }
 
 func (p *GeneratePutPreSignedUrlRequest) Read(iprot thrift.TProtocol) (err error) {
@@ -78,7 +87,7 @@ func (p *GeneratePutPreSignedUrlRequest) Read(iprot thrift.TProtocol) (err error
 				goto SkipFieldError
 			}
 		case 2:
-			if fieldTypeId == thrift.BYTE {
+			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField2(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -86,8 +95,16 @@ func (p *GeneratePutPreSignedUrlRequest) Read(iprot thrift.TProtocol) (err error
 				goto SkipFieldError
 			}
 		case 3:
-			if fieldTypeId == thrift.I32 {
+			if fieldTypeId == thrift.BYTE {
 				if err = p.ReadField3(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 4:
+			if fieldTypeId == thrift.I32 {
+				if err = p.ReadField4(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -135,6 +152,17 @@ func (p *GeneratePutPreSignedUrlRequest) ReadField1(iprot thrift.TProtocol) erro
 }
 func (p *GeneratePutPreSignedUrlRequest) ReadField2(iprot thrift.TProtocol) error {
 
+	var _field string
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		_field = v
+	}
+	p.Bucket = _field
+	return nil
+}
+func (p *GeneratePutPreSignedUrlRequest) ReadField3(iprot thrift.TProtocol) error {
+
 	var _field int8
 	if v, err := iprot.ReadByte(); err != nil {
 		return err
@@ -144,7 +172,7 @@ func (p *GeneratePutPreSignedUrlRequest) ReadField2(iprot thrift.TProtocol) erro
 	p.BlobType = _field
 	return nil
 }
-func (p *GeneratePutPreSignedUrlRequest) ReadField3(iprot thrift.TProtocol) error {
+func (p *GeneratePutPreSignedUrlRequest) ReadField4(iprot thrift.TProtocol) error {
 
 	var _field int32
 	if v, err := iprot.ReadI32(); err != nil {
@@ -172,6 +200,10 @@ func (p *GeneratePutPreSignedUrlRequest) Write(oprot thrift.TProtocol) (err erro
 		}
 		if err = p.writeField3(oprot); err != nil {
 			fieldId = 3
+			goto WriteFieldError
+		}
+		if err = p.writeField4(oprot); err != nil {
+			fieldId = 4
 			goto WriteFieldError
 		}
 	}
@@ -210,10 +242,10 @@ WriteFieldEndError:
 }
 
 func (p *GeneratePutPreSignedUrlRequest) writeField2(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("blob_type", thrift.BYTE, 2); err != nil {
+	if err = oprot.WriteFieldBegin("bucket", thrift.STRING, 2); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteByte(p.BlobType); err != nil {
+	if err := oprot.WriteString(p.Bucket); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -227,10 +259,10 @@ WriteFieldEndError:
 }
 
 func (p *GeneratePutPreSignedUrlRequest) writeField3(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("timeout", thrift.I32, 3); err != nil {
+	if err = oprot.WriteFieldBegin("blob_type", thrift.BYTE, 3); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteI32(p.Timeout); err != nil {
+	if err := oprot.WriteByte(p.BlobType); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -241,6 +273,23 @@ WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
+}
+
+func (p *GeneratePutPreSignedUrlRequest) writeField4(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("timeout", thrift.I32, 4); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteI32(p.Timeout); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 4 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 4 end error: ", p), err)
 }
 
 func (p *GeneratePutPreSignedUrlRequest) String() string {
@@ -260,10 +309,13 @@ func (p *GeneratePutPreSignedUrlRequest) DeepEqual(ano *GeneratePutPreSignedUrlR
 	if !p.Field1DeepEqual(ano.UserId) {
 		return false
 	}
-	if !p.Field2DeepEqual(ano.BlobType) {
+	if !p.Field2DeepEqual(ano.Bucket) {
 		return false
 	}
-	if !p.Field3DeepEqual(ano.Timeout) {
+	if !p.Field3DeepEqual(ano.BlobType) {
+		return false
+	}
+	if !p.Field4DeepEqual(ano.Timeout) {
 		return false
 	}
 	return true
@@ -276,14 +328,21 @@ func (p *GeneratePutPreSignedUrlRequest) Field1DeepEqual(src string) bool {
 	}
 	return true
 }
-func (p *GeneratePutPreSignedUrlRequest) Field2DeepEqual(src int8) bool {
+func (p *GeneratePutPreSignedUrlRequest) Field2DeepEqual(src string) bool {
+
+	if strings.Compare(p.Bucket, src) != 0 {
+		return false
+	}
+	return true
+}
+func (p *GeneratePutPreSignedUrlRequest) Field3DeepEqual(src int8) bool {
 
 	if p.BlobType != src {
 		return false
 	}
 	return true
 }
-func (p *GeneratePutPreSignedUrlRequest) Field3DeepEqual(src int32) bool {
+func (p *GeneratePutPreSignedUrlRequest) Field4DeepEqual(src int32) bool {
 
 	if p.Timeout != src {
 		return false
@@ -575,7 +634,8 @@ func (p *GeneratePutPreSignedUrlResponse) Field3DeepEqual(src string) bool {
 
 type GenerateGetPreSignedUrlRequest struct {
 	BlobId  string `thrift:"blob_id,1" frugal:"1,default,string" json:"blob_id"`
-	Timeout int32  `thrift:"timeout,2" frugal:"2,default,i32" json:"timeout"`
+	Bucket  string `thrift:"bucket,2" frugal:"2,default,string" json:"bucket"`
+	Timeout int32  `thrift:"timeout,3" frugal:"3,default,i32" json:"timeout"`
 }
 
 func NewGenerateGetPreSignedUrlRequest() *GenerateGetPreSignedUrlRequest {
@@ -590,11 +650,18 @@ func (p *GenerateGetPreSignedUrlRequest) GetBlobId() (v string) {
 	return p.BlobId
 }
 
+func (p *GenerateGetPreSignedUrlRequest) GetBucket() (v string) {
+	return p.Bucket
+}
+
 func (p *GenerateGetPreSignedUrlRequest) GetTimeout() (v int32) {
 	return p.Timeout
 }
 func (p *GenerateGetPreSignedUrlRequest) SetBlobId(val string) {
 	p.BlobId = val
+}
+func (p *GenerateGetPreSignedUrlRequest) SetBucket(val string) {
+	p.Bucket = val
 }
 func (p *GenerateGetPreSignedUrlRequest) SetTimeout(val int32) {
 	p.Timeout = val
@@ -602,7 +669,8 @@ func (p *GenerateGetPreSignedUrlRequest) SetTimeout(val int32) {
 
 var fieldIDToName_GenerateGetPreSignedUrlRequest = map[int16]string{
 	1: "blob_id",
-	2: "timeout",
+	2: "bucket",
+	3: "timeout",
 }
 
 func (p *GenerateGetPreSignedUrlRequest) Read(iprot thrift.TProtocol) (err error) {
@@ -633,8 +701,16 @@ func (p *GenerateGetPreSignedUrlRequest) Read(iprot thrift.TProtocol) (err error
 				goto SkipFieldError
 			}
 		case 2:
-			if fieldTypeId == thrift.I32 {
+			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField2(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 3:
+			if fieldTypeId == thrift.I32 {
+				if err = p.ReadField3(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -682,6 +758,17 @@ func (p *GenerateGetPreSignedUrlRequest) ReadField1(iprot thrift.TProtocol) erro
 }
 func (p *GenerateGetPreSignedUrlRequest) ReadField2(iprot thrift.TProtocol) error {
 
+	var _field string
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		_field = v
+	}
+	p.Bucket = _field
+	return nil
+}
+func (p *GenerateGetPreSignedUrlRequest) ReadField3(iprot thrift.TProtocol) error {
+
 	var _field int32
 	if v, err := iprot.ReadI32(); err != nil {
 		return err
@@ -704,6 +791,10 @@ func (p *GenerateGetPreSignedUrlRequest) Write(oprot thrift.TProtocol) (err erro
 		}
 		if err = p.writeField2(oprot); err != nil {
 			fieldId = 2
+			goto WriteFieldError
+		}
+		if err = p.writeField3(oprot); err != nil {
+			fieldId = 3
 			goto WriteFieldError
 		}
 	}
@@ -742,10 +833,10 @@ WriteFieldEndError:
 }
 
 func (p *GenerateGetPreSignedUrlRequest) writeField2(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("timeout", thrift.I32, 2); err != nil {
+	if err = oprot.WriteFieldBegin("bucket", thrift.STRING, 2); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteI32(p.Timeout); err != nil {
+	if err := oprot.WriteString(p.Bucket); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -756,6 +847,23 @@ WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
+}
+
+func (p *GenerateGetPreSignedUrlRequest) writeField3(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("timeout", thrift.I32, 3); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteI32(p.Timeout); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
 }
 
 func (p *GenerateGetPreSignedUrlRequest) String() string {
@@ -775,7 +883,10 @@ func (p *GenerateGetPreSignedUrlRequest) DeepEqual(ano *GenerateGetPreSignedUrlR
 	if !p.Field1DeepEqual(ano.BlobId) {
 		return false
 	}
-	if !p.Field2DeepEqual(ano.Timeout) {
+	if !p.Field2DeepEqual(ano.Bucket) {
+		return false
+	}
+	if !p.Field3DeepEqual(ano.Timeout) {
 		return false
 	}
 	return true
@@ -788,7 +899,14 @@ func (p *GenerateGetPreSignedUrlRequest) Field1DeepEqual(src string) bool {
 	}
 	return true
 }
-func (p *GenerateGetPreSignedUrlRequest) Field2DeepEqual(src int32) bool {
+func (p *GenerateGetPreSignedUrlRequest) Field2DeepEqual(src string) bool {
+
+	if strings.Compare(p.Bucket, src) != 0 {
+		return false
+	}
+	return true
+}
+func (p *GenerateGetPreSignedUrlRequest) Field3DeepEqual(src int32) bool {
 
 	if p.Timeout != src {
 		return false

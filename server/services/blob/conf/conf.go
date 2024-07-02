@@ -26,6 +26,7 @@ type ServerConfig struct {
 	BucketConfig BucketConfig `mapstructure:"bucket" json:"bucket"`
 	MQConfig     MQConfig     `mapstructure:"mq" json:"mq"`
 	RedisConfig  RedisConfig  `mapstructure:"redis" json:"redis"`
+	UserSrvInfo  RPCSrvConfig `mapstructure:"user_srv" json:"user_srv"`
 }
 
 type OtelConfig struct {
@@ -39,10 +40,10 @@ type ConsulConfig struct {
 }
 
 type BucketConfig struct {
-	EndPoint     string `mapstructure:"endpoint" json:"endpoint"`
-	AccessKeyID  string `mapstructure:"access_key_id" json:"access_key_id"`
-	AccessSecret string `mapstructure:"access_secret" json:"access_secret"`
-	AvatarBucket string `mapstructure:"avatar_bucket" json:"avatar_bucket"`
+	EndPoint     string   `mapstructure:"endpoint" json:"endpoint"`
+	AccessKeyID  string   `mapstructure:"access_key_id" json:"access_key_id"`
+	AccessSecret string   `mapstructure:"access_secret" json:"access_secret"`
+	Buckets      []string `mapstructure:"buckets" json:"buckets"`
 }
 
 type MQConfig struct {
@@ -61,4 +62,8 @@ type RedisConfig struct {
 type RedisServerConfig struct {
 	Name string `mapstructure:"name" json:"name"`
 	Addr string `mapstructure:"addr" json:"addr"`
+}
+
+type RPCSrvConfig struct {
+	Name string `mapstructure:"name" json:"name"`
 }

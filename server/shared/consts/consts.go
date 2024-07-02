@@ -25,6 +25,8 @@ const (
 	JPEGContentType = "image/jpeg"
 	MP4ContentType  = "video/mp4"
 
+	AvatarBucket = "avatar"
+
 	IPFlagName    = "ip"
 	IPFlagValue   = "0.0.0.0"
 	IPFlagUsage   = "address"

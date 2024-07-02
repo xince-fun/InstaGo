@@ -3097,34 +3097,6 @@ func (p *UpdateAvatarInfoRequest) FastRead(buf []byte) (int, error) {
 					goto SkipFieldError
 				}
 			}
-		case 3:
-			if fieldTypeId == thrift.STRING {
-				l, err = p.FastReadField3(buf[offset:])
-				offset += l
-				if err != nil {
-					goto ReadFieldError
-				}
-			} else {
-				l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
-				offset += l
-				if err != nil {
-					goto SkipFieldError
-				}
-			}
-		case 4:
-			if fieldTypeId == thrift.BYTE {
-				l, err = p.FastReadField4(buf[offset:])
-				offset += l
-				if err != nil {
-					goto ReadFieldError
-				}
-			} else {
-				l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
-				offset += l
-				if err != nil {
-					goto SkipFieldError
-				}
-			}
 		default:
 			l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
 			offset += l
@@ -3188,34 +3160,6 @@ func (p *UpdateAvatarInfoRequest) FastReadField2(buf []byte) (int, error) {
 	return offset, nil
 }
 
-func (p *UpdateAvatarInfoRequest) FastReadField3(buf []byte) (int, error) {
-	offset := 0
-
-	if v, l, err := bthrift.Binary.ReadString(buf[offset:]); err != nil {
-		return offset, err
-	} else {
-		offset += l
-
-		p.ObjectName = v
-
-	}
-	return offset, nil
-}
-
-func (p *UpdateAvatarInfoRequest) FastReadField4(buf []byte) (int, error) {
-	offset := 0
-
-	if v, l, err := bthrift.Binary.ReadByte(buf[offset:]); err != nil {
-		return offset, err
-	} else {
-		offset += l
-
-		p.BlobType = v
-
-	}
-	return offset, nil
-}
-
 // for compatibility
 func (p *UpdateAvatarInfoRequest) FastWrite(buf []byte) int {
 	return 0
@@ -3225,10 +3169,8 @@ func (p *UpdateAvatarInfoRequest) FastWriteNocopy(buf []byte, binaryWriter bthri
 	offset := 0
 	offset += bthrift.Binary.WriteStructBegin(buf[offset:], "UpdateAvatarInfoRequest")
 	if p != nil {
-		offset += p.fastWriteField4(buf[offset:], binaryWriter)
 		offset += p.fastWriteField1(buf[offset:], binaryWriter)
 		offset += p.fastWriteField2(buf[offset:], binaryWriter)
-		offset += p.fastWriteField3(buf[offset:], binaryWriter)
 	}
 	offset += bthrift.Binary.WriteFieldStop(buf[offset:])
 	offset += bthrift.Binary.WriteStructEnd(buf[offset:])
@@ -3241,8 +3183,6 @@ func (p *UpdateAvatarInfoRequest) BLength() int {
 	if p != nil {
 		l += p.field1Length()
 		l += p.field2Length()
-		l += p.field3Length()
-		l += p.field4Length()
 	}
 	l += bthrift.Binary.FieldStopLength()
 	l += bthrift.Binary.StructEndLength()
@@ -3267,24 +3207,6 @@ func (p *UpdateAvatarInfoRequest) fastWriteField2(buf []byte, binaryWriter bthri
 	return offset
 }
 
-func (p *UpdateAvatarInfoRequest) fastWriteField3(buf []byte, binaryWriter bthrift.BinaryWriter) int {
-	offset := 0
-	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "object_name", thrift.STRING, 3)
-	offset += bthrift.Binary.WriteStringNocopy(buf[offset:], binaryWriter, p.ObjectName)
-
-	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
-	return offset
-}
-
-func (p *UpdateAvatarInfoRequest) fastWriteField4(buf []byte, binaryWriter bthrift.BinaryWriter) int {
-	offset := 0
-	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "blob_type", thrift.BYTE, 4)
-	offset += bthrift.Binary.WriteByte(buf[offset:], p.BlobType)
-
-	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
-	return offset
-}
-
 func (p *UpdateAvatarInfoRequest) field1Length() int {
 	l := 0
 	l += bthrift.Binary.FieldBeginLength("user_id", thrift.STRING, 1)
@@ -3298,24 +3220,6 @@ func (p *UpdateAvatarInfoRequest) field2Length() int {
 	l := 0
 	l += bthrift.Binary.FieldBeginLength("avatar_id", thrift.STRING, 2)
 	l += bthrift.Binary.StringLengthNocopy(p.AvatarId)
-
-	l += bthrift.Binary.FieldEndLength()
-	return l
-}
-
-func (p *UpdateAvatarInfoRequest) field3Length() int {
-	l := 0
-	l += bthrift.Binary.FieldBeginLength("object_name", thrift.STRING, 3)
-	l += bthrift.Binary.StringLengthNocopy(p.ObjectName)
-
-	l += bthrift.Binary.FieldEndLength()
-	return l
-}
-
-func (p *UpdateAvatarInfoRequest) field4Length() int {
-	l := 0
-	l += bthrift.Binary.FieldBeginLength("blob_type", thrift.BYTE, 4)
-	l += bthrift.Binary.ByteLength(p.BlobType)
 
 	l += bthrift.Binary.FieldEndLength()
 	return l

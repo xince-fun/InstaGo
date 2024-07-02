@@ -24,7 +24,6 @@ func Register(r *server.Hertz) {
 			{
 				_user := _v1.Group("/user", _userMw()...)
 				_user.POST("/avatar", append(_uploadavatarMw(), user.UploadAvatar)...)
-				_user.PUT("/avatar", append(_updateavatarinfoMw(), user.UpdateAvatarInfo)...)
 				_user.GET("/avatar", append(_getavatarMw(), user.GetAvatar)...)
 				_user.PUT("/birthday", append(_updatebirthdayMw(), user.UpdateBirthDay)...)
 				_user.PUT("/email", append(_updateemailMw(), user.UpdateEmail)...)

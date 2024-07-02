@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/google/wire"
-	"github.com/xince-fun/InstaGo/server/services/blob/conf"
 	"github.com/xince-fun/InstaGo/server/services/blob/domain/entity"
 	"github.com/xince-fun/InstaGo/server/services/blob/domain/repo"
 	"github.com/xince-fun/InstaGo/server/services/blob/infra/cache"
@@ -57,9 +56,8 @@ func (s *BlobApplicationService) GeneratePutPreSignedUrl(ctx context.Context, re
 	}
 
 	objectName := fmt.Sprintf("%s/%d/%s", req.UserId, req.BlobType, blobID)
-	bucketName := conf.GlobalServerConf.BucketConfig.AvatarBucket
 
-	url, err := s.bucketManager.GeneratePutObjectSignedURL(ctx, bucketName, objectName, time.Duration(req.Timeout)*time.Second)
+	url, err := s.bucketManager.GeneratePutObjectSignedURL(ctx, req.Bucket, objectName, time.Duration(req.Timeout)*time.Second)
 	if err != nil {
 		return nil, errno.BlobSrvError
 	}
@@ -92,8 +90,7 @@ func (s *BlobApplicationService) GenerateGetPreSignedUrl(ctx context.Context, re
 		}()
 	}
 
-	bucketName := conf.GlobalServerConf.BucketConfig.AvatarBucket
-	url, err := s.bucketManager.GenerateGetObjectSignedURL(ctx, bucketName, objectName, time.Duration(req.Timeout)*time.Second)
+	url, err := s.bucketManager.GenerateGetObjectSignedURL(ctx, req.Bucket, objectName, time.Duration(req.Timeout)*time.Second)
 	if err != nil {
 		klog.Infof("error: %v", err)
 		return resp, errno.BlobSrvError

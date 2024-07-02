@@ -6,6 +6,7 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/minio/minio-go/v7/pkg/notification"
 	"github.com/xince-fun/InstaGo/server/services/blob/conf"
 )
 
@@ -19,16 +20,7 @@ func InitMinio() *minio.Client {
 	if err != nil {
 		klog.Fatalf("create minio client failed %v", err)
 	}
-	exists, err := mc.BucketExists(context.Background(), c.AvatarBucket)
-	if err != nil {
-		klog.Fatalf("check bucket exists failed %v", err)
-	}
-	if !exists {
-		err = mc.MakeBucket(context.Background(), c.AvatarBucket, minio.MakeBucketOptions{Region: "cn-north-1"})
-		if err != nil {
-			klog.Fatalf("make bucket failed %v", err)
-		}
-	}
+
 	policy := `{
         "Version": "2012-10-17",
         "Statement": [
@@ -47,9 +39,35 @@ func InitMinio() *minio.Client {
             }
         ]
     }`
-	err = mc.SetBucketPolicy(context.Background(), c.AvatarBucket, fmt.Sprintf(policy, c.AvatarBucket))
-	if err != nil {
-		klog.Fatalf("set bucket policy failed %v", err)
+
+	for _, bucket := range c.Buckets {
+		exists, err := mc.BucketExists(context.Background(), bucket)
+		if err != nil {
+			klog.Fatalf("check bucket exists failed %v", err)
+		}
+		if !exists {
+			err = mc.MakeBucket(context.Background(), bucket, minio.MakeBucketOptions{Region: "cn-north-1"})
+			if err != nil {
+				klog.Fatalf("make bucket failed %v", err)
+			}
+		}
+		err = mc.SetBucketPolicy(context.Background(), bucket, fmt.Sprintf(policy, bucket))
+		if err != nil {
+			klog.Fatalf("set bucket policy failed %v", err)
+		}
+
+		config := notification.Configuration{}
+
+		topicArn := notification.NewArn("minio", "sqs", "", "instago-blob", "amqp")
+		topicConfig := notification.NewConfig(topicArn)
+		topicConfig.AddEvents(notification.ObjectCreatedAll, notification.ObjectRemovedAll)
+
+		config.AddQueue(topicConfig)
+
+		if err = mc.SetBucketNotification(context.Background(), bucket, config); err != nil {
+			klog.Fatalf("set bucket notification failed %v", err)
+		}
 	}
+
 	return mc
 }

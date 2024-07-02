@@ -63,7 +63,7 @@ func (p *GeneratePutPreSignedUrlRequest) FastRead(buf []byte) (int, error) {
 				}
 			}
 		case 2:
-			if fieldTypeId == thrift.BYTE {
+			if fieldTypeId == thrift.STRING {
 				l, err = p.FastReadField2(buf[offset:])
 				offset += l
 				if err != nil {
@@ -77,8 +77,22 @@ func (p *GeneratePutPreSignedUrlRequest) FastRead(buf []byte) (int, error) {
 				}
 			}
 		case 3:
-			if fieldTypeId == thrift.I32 {
+			if fieldTypeId == thrift.BYTE {
 				l, err = p.FastReadField3(buf[offset:])
+				offset += l
+				if err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
+				offset += l
+				if err != nil {
+					goto SkipFieldError
+				}
+			}
+		case 4:
+			if fieldTypeId == thrift.I32 {
+				l, err = p.FastReadField4(buf[offset:])
 				offset += l
 				if err != nil {
 					goto ReadFieldError
@@ -142,6 +156,20 @@ func (p *GeneratePutPreSignedUrlRequest) FastReadField1(buf []byte) (int, error)
 func (p *GeneratePutPreSignedUrlRequest) FastReadField2(buf []byte) (int, error) {
 	offset := 0
 
+	if v, l, err := bthrift.Binary.ReadString(buf[offset:]); err != nil {
+		return offset, err
+	} else {
+		offset += l
+
+		p.Bucket = v
+
+	}
+	return offset, nil
+}
+
+func (p *GeneratePutPreSignedUrlRequest) FastReadField3(buf []byte) (int, error) {
+	offset := 0
+
 	if v, l, err := bthrift.Binary.ReadByte(buf[offset:]); err != nil {
 		return offset, err
 	} else {
@@ -153,7 +181,7 @@ func (p *GeneratePutPreSignedUrlRequest) FastReadField2(buf []byte) (int, error)
 	return offset, nil
 }
 
-func (p *GeneratePutPreSignedUrlRequest) FastReadField3(buf []byte) (int, error) {
+func (p *GeneratePutPreSignedUrlRequest) FastReadField4(buf []byte) (int, error) {
 	offset := 0
 
 	if v, l, err := bthrift.Binary.ReadI32(buf[offset:]); err != nil {
@@ -176,9 +204,10 @@ func (p *GeneratePutPreSignedUrlRequest) FastWriteNocopy(buf []byte, binaryWrite
 	offset := 0
 	offset += bthrift.Binary.WriteStructBegin(buf[offset:], "GeneratePutPreSignedUrlRequest")
 	if p != nil {
-		offset += p.fastWriteField2(buf[offset:], binaryWriter)
 		offset += p.fastWriteField3(buf[offset:], binaryWriter)
+		offset += p.fastWriteField4(buf[offset:], binaryWriter)
 		offset += p.fastWriteField1(buf[offset:], binaryWriter)
+		offset += p.fastWriteField2(buf[offset:], binaryWriter)
 	}
 	offset += bthrift.Binary.WriteFieldStop(buf[offset:])
 	offset += bthrift.Binary.WriteStructEnd(buf[offset:])
@@ -192,6 +221,7 @@ func (p *GeneratePutPreSignedUrlRequest) BLength() int {
 		l += p.field1Length()
 		l += p.field2Length()
 		l += p.field3Length()
+		l += p.field4Length()
 	}
 	l += bthrift.Binary.FieldStopLength()
 	l += bthrift.Binary.StructEndLength()
@@ -209,8 +239,8 @@ func (p *GeneratePutPreSignedUrlRequest) fastWriteField1(buf []byte, binaryWrite
 
 func (p *GeneratePutPreSignedUrlRequest) fastWriteField2(buf []byte, binaryWriter bthrift.BinaryWriter) int {
 	offset := 0
-	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "blob_type", thrift.BYTE, 2)
-	offset += bthrift.Binary.WriteByte(buf[offset:], p.BlobType)
+	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "bucket", thrift.STRING, 2)
+	offset += bthrift.Binary.WriteStringNocopy(buf[offset:], binaryWriter, p.Bucket)
 
 	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
 	return offset
@@ -218,7 +248,16 @@ func (p *GeneratePutPreSignedUrlRequest) fastWriteField2(buf []byte, binaryWrite
 
 func (p *GeneratePutPreSignedUrlRequest) fastWriteField3(buf []byte, binaryWriter bthrift.BinaryWriter) int {
 	offset := 0
-	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "timeout", thrift.I32, 3)
+	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "blob_type", thrift.BYTE, 3)
+	offset += bthrift.Binary.WriteByte(buf[offset:], p.BlobType)
+
+	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
+	return offset
+}
+
+func (p *GeneratePutPreSignedUrlRequest) fastWriteField4(buf []byte, binaryWriter bthrift.BinaryWriter) int {
+	offset := 0
+	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "timeout", thrift.I32, 4)
 	offset += bthrift.Binary.WriteI32(buf[offset:], p.Timeout)
 
 	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
@@ -236,8 +275,8 @@ func (p *GeneratePutPreSignedUrlRequest) field1Length() int {
 
 func (p *GeneratePutPreSignedUrlRequest) field2Length() int {
 	l := 0
-	l += bthrift.Binary.FieldBeginLength("blob_type", thrift.BYTE, 2)
-	l += bthrift.Binary.ByteLength(p.BlobType)
+	l += bthrift.Binary.FieldBeginLength("bucket", thrift.STRING, 2)
+	l += bthrift.Binary.StringLengthNocopy(p.Bucket)
 
 	l += bthrift.Binary.FieldEndLength()
 	return l
@@ -245,7 +284,16 @@ func (p *GeneratePutPreSignedUrlRequest) field2Length() int {
 
 func (p *GeneratePutPreSignedUrlRequest) field3Length() int {
 	l := 0
-	l += bthrift.Binary.FieldBeginLength("timeout", thrift.I32, 3)
+	l += bthrift.Binary.FieldBeginLength("blob_type", thrift.BYTE, 3)
+	l += bthrift.Binary.ByteLength(p.BlobType)
+
+	l += bthrift.Binary.FieldEndLength()
+	return l
+}
+
+func (p *GeneratePutPreSignedUrlRequest) field4Length() int {
+	l := 0
+	l += bthrift.Binary.FieldBeginLength("timeout", thrift.I32, 4)
 	l += bthrift.Binary.I32Length(p.Timeout)
 
 	l += bthrift.Binary.FieldEndLength()
@@ -515,8 +563,22 @@ func (p *GenerateGetPreSignedUrlRequest) FastRead(buf []byte) (int, error) {
 				}
 			}
 		case 2:
-			if fieldTypeId == thrift.I32 {
+			if fieldTypeId == thrift.STRING {
 				l, err = p.FastReadField2(buf[offset:])
+				offset += l
+				if err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
+				offset += l
+				if err != nil {
+					goto SkipFieldError
+				}
+			}
+		case 3:
+			if fieldTypeId == thrift.I32 {
+				l, err = p.FastReadField3(buf[offset:])
 				offset += l
 				if err != nil {
 					goto ReadFieldError
@@ -580,6 +642,20 @@ func (p *GenerateGetPreSignedUrlRequest) FastReadField1(buf []byte) (int, error)
 func (p *GenerateGetPreSignedUrlRequest) FastReadField2(buf []byte) (int, error) {
 	offset := 0
 
+	if v, l, err := bthrift.Binary.ReadString(buf[offset:]); err != nil {
+		return offset, err
+	} else {
+		offset += l
+
+		p.Bucket = v
+
+	}
+	return offset, nil
+}
+
+func (p *GenerateGetPreSignedUrlRequest) FastReadField3(buf []byte) (int, error) {
+	offset := 0
+
 	if v, l, err := bthrift.Binary.ReadI32(buf[offset:]); err != nil {
 		return offset, err
 	} else {
@@ -600,8 +676,9 @@ func (p *GenerateGetPreSignedUrlRequest) FastWriteNocopy(buf []byte, binaryWrite
 	offset := 0
 	offset += bthrift.Binary.WriteStructBegin(buf[offset:], "GenerateGetPreSignedUrlRequest")
 	if p != nil {
-		offset += p.fastWriteField2(buf[offset:], binaryWriter)
+		offset += p.fastWriteField3(buf[offset:], binaryWriter)
 		offset += p.fastWriteField1(buf[offset:], binaryWriter)
+		offset += p.fastWriteField2(buf[offset:], binaryWriter)
 	}
 	offset += bthrift.Binary.WriteFieldStop(buf[offset:])
 	offset += bthrift.Binary.WriteStructEnd(buf[offset:])
@@ -614,6 +691,7 @@ func (p *GenerateGetPreSignedUrlRequest) BLength() int {
 	if p != nil {
 		l += p.field1Length()
 		l += p.field2Length()
+		l += p.field3Length()
 	}
 	l += bthrift.Binary.FieldStopLength()
 	l += bthrift.Binary.StructEndLength()
@@ -631,7 +709,16 @@ func (p *GenerateGetPreSignedUrlRequest) fastWriteField1(buf []byte, binaryWrite
 
 func (p *GenerateGetPreSignedUrlRequest) fastWriteField2(buf []byte, binaryWriter bthrift.BinaryWriter) int {
 	offset := 0
-	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "timeout", thrift.I32, 2)
+	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "bucket", thrift.STRING, 2)
+	offset += bthrift.Binary.WriteStringNocopy(buf[offset:], binaryWriter, p.Bucket)
+
+	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
+	return offset
+}
+
+func (p *GenerateGetPreSignedUrlRequest) fastWriteField3(buf []byte, binaryWriter bthrift.BinaryWriter) int {
+	offset := 0
+	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "timeout", thrift.I32, 3)
 	offset += bthrift.Binary.WriteI32(buf[offset:], p.Timeout)
 
 	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
@@ -649,7 +736,16 @@ func (p *GenerateGetPreSignedUrlRequest) field1Length() int {
 
 func (p *GenerateGetPreSignedUrlRequest) field2Length() int {
 	l := 0
-	l += bthrift.Binary.FieldBeginLength("timeout", thrift.I32, 2)
+	l += bthrift.Binary.FieldBeginLength("bucket", thrift.STRING, 2)
+	l += bthrift.Binary.StringLengthNocopy(p.Bucket)
+
+	l += bthrift.Binary.FieldEndLength()
+	return l
+}
+
+func (p *GenerateGetPreSignedUrlRequest) field3Length() int {
+	l := 0
+	l += bthrift.Binary.FieldBeginLength("timeout", thrift.I32, 3)
 	l += bthrift.Binary.I32Length(p.Timeout)
 
 	l += bthrift.Binary.FieldEndLength()

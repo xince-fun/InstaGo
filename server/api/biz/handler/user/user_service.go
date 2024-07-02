@@ -265,35 +265,6 @@ func UploadAvatar(ctx context.Context, c *app.RequestContext) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// UpdateAvatarInfo .
-// @router /api/v1/user/avatar [PUT]
-func UpdateAvatarInfo(ctx context.Context, c *app.RequestContext) {
-	var err error
-	var req user.UpdateAvatarInfoRequest
-
-	resp := new(kuser.UpdateAvatarInfoResponse)
-	if err = c.BindAndValidate(&req); err != nil {
-		resp.BaseResp = utils.BuildBaseResp(errno.ParamsErr)
-		c.JSON(http.StatusBadRequest, resp)
-		return
-	}
-
-	resp, err = rpc.UpdateAvatarInfo(ctx, &kuser.UpdateAvatarInfoRequest{
-		UserId:     c.MustGet(consts.UserID).(string),
-		AvatarId:   req.AvatarID,
-		ObjectName: req.ObjectName,
-		BlobType:   req.BlobType,
-	})
-	if err != nil {
-		hlog.Error("rpc user service err", err)
-		resp.BaseResp = utils.BuildBaseResp(errno.ServiceErr)
-		c.JSON(http.StatusInternalServerError, resp)
-		return
-	}
-
-	c.JSON(http.StatusOK, resp)
-}
-
 // GetAvatar .
 // @router /api/v1/user/avatar [GET]
 func GetAvatar(ctx context.Context, c *app.RequestContext) {
